@@ -30,7 +30,7 @@ export async function POST(
         date: new Date(date),
         feedSlots: {
           create: feeds.map((f: any) => ({
-            feedTime: new Date(`${date}T${f.feedTime}:00.000Z`),
+            feedTime: new Date(f.feedTime),
             feedType: f.feedType,
             feedName: f.feedName,
             amount: parseFloat(f.amount),
@@ -63,13 +63,3 @@ export async function POST(
     return Res.serverError();
   }
 }
-
-// {
-//   "title": "Daily Milk Routine",
-//   "date": "2025-11-11",
-//   "feeds": [
-//     { "feedTime": "2025-11-11T08:00:00.000Z", "feedType": "milk", "amount": 120 },
-//     { "feedTime": "2025-11-11T12:00:00.000Z", "feedType": "milk", "amount": 120 },
-//     { "feedTime": "2025-11-11T16:00:00.000Z", "feedType": "milk", "amount": 120 }
-//   ]
-// }
