@@ -104,6 +104,7 @@ export async function GET(
         // const feedPerDay = currentFeed.feedSlots.length;
         const feedSlots = currentFeed?.feedSlots ?? [];
         const feedPerDay = feedSlots.length;
+        const currentFeedTitle = currentFeed?.title || null;
 
         // const nextVaccination = await prisma.vaccinationProgress.findFirst({
         //     where: {
@@ -219,7 +220,7 @@ export async function GET(
                 latestTemperature,
                 latestSleep,
                 totalSleepMinutesLast7Days,
-                currentFeed: currentFeed.title || null,
+                currentFeed: currentFeedTitle,
                 feedPerDay,
                 milestones: { nextMilestone, lastMilestone, totalMilestones, achievedMilestones, remainingMilestones },
                 vaccinations: { nextVaccination, lastVaccination, totalVaccinations, achievedVaccinations, remainingVaccinations },
