@@ -101,7 +101,9 @@ export async function GET(
             }
         });
 
-        const feedPerDay = currentFeed.feedSlots.length;
+        // const feedPerDay = currentFeed.feedSlots.length;
+        const feedSlots = currentFeed?.feedSlots ?? [];
+        const feedPerDay = feedSlots.length;
 
         // const nextVaccination = await prisma.vaccinationProgress.findFirst({
         //     where: {
