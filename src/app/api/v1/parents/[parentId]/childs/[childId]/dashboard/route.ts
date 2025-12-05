@@ -170,9 +170,11 @@ export async function GET(
         // Fetch vaccination progress
         const vaccinationProgress = await prisma.vaccinationProgress.findMany({
             where: { childId },
-            select: { vaccinationId: true, status: true, date: true, vaccination: {
-                select: { name: true }
-            } },
+            select: {
+                vaccinationId: true, status: true, date: true, vaccination: {
+                    select: { name: true }
+                }
+            },
         });
 
         // Achieved vaccination IDs
