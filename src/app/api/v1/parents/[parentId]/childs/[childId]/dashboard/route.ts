@@ -217,7 +217,7 @@ export async function GET(
                 latestTemperature,
                 latestSleep,
                 totalSleepMinutesLast7Days,
-                currentFeed: currentFeed.title,
+                currentFeed: currentFeed.title || null,
                 feedPerDay,
                 milestones: { nextMilestone, lastMilestone, totalMilestones, achievedMilestones, remainingMilestones },
                 vaccinations: { nextVaccination, lastVaccination, totalVaccinations, achievedVaccinations, remainingVaccinations },
