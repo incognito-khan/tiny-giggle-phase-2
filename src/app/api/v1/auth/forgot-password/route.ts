@@ -157,8 +157,8 @@ export async function POST(
     }
 
     if (role === 'relative') {
-      const existingRelative = await prisma.childRelation.findUnique({
-        where: { email },
+      const existingRelative = await prisma.childRelation.findFirst({
+        where: { email, isDeleted: false },
       });
       if (!existingRelative) {
         return Res.notFound({ message: "Invalid email" });

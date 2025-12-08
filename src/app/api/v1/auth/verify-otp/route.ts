@@ -110,7 +110,7 @@ export async function POST(
     }
 
     if (role === 'relative' && type === 'PASSWORD_RESET') {
-      const relative = await prisma.childRelation.findUnique({ where: { email } });
+      const relative = await prisma.childRelation.findFirst({ where: { email, isDeleted: false } });
       if (!relative) {
         return Res.notFound({ message: "User not found" });
       }

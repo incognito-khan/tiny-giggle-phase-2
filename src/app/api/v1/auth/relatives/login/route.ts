@@ -34,9 +34,10 @@ export async function POST(
     //   return Res.badRequest({ message: "Captcha verification failed" });
     // }
 
-    const existingUser = await prisma.childRelation.findUnique({
+    const existingUser = await prisma.childRelation.findFirst({
       where: {
         email,
+        isDeleted: false
       },
       include: {
         child: {

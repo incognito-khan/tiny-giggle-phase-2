@@ -138,8 +138,8 @@ export async function POST(
     }
 
     if (role === 'relative') {
-      const existingUser = await prisma.childRelation.findUnique({
-        where: { email },
+      const existingUser = await prisma.childRelation.findFirst({
+        where: { email, isDeleted: false },
       });
       if (!existingUser) {
         return Res.unauthorized({ message: "No account found" });
@@ -161,8 +161,8 @@ export async function POST(
 
       const hashedPassword = await hashing(password);
 
-      await prisma.childRelation.update({
-        where: { email },
+      await prisma.childRelation.updateMany({
+        where: { email, isDeleted: false },
         data: { password: hashedPassword }
       })
 
