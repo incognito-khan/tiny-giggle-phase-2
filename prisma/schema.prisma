@@ -747,7 +747,7 @@ model ChildRelation {
   id          String        @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   password    String
-  email       String        @unique
+  email       String
   dateOfBirth String
   dateOfDeath String?
   relation    Relation

@@ -30,7 +30,21 @@ export async function POST(
     });
     if (!existingChild) {
       return Res.badRequest({ message: "No child found" });
+    };
+
+    const existingActiveRelation = await prisma.childRelation.findFirst({
+      where: {
+        email,
+        isDeleted: false
+      }
+    });
+
+    if (existingActiveRelation) {
+      return Res.badRequest({
+        message: "This email already exists for another active relation."
+      });
     }
+
     const password = nanoid(8);
 
     const hashedPassword = await hashing(password);
@@ -46,7 +60,7 @@ export async function POST(
         isDeleted: false
       },
     });
-    
+
     const loginLink = `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/auth?tab=login`;
     const res = await sendEmail(email, "new-relative-account", {
       inviterName: existingParent.name,
