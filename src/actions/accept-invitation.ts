@@ -19,7 +19,6 @@ export async function acceptInvitation({
     const existingParent = await prisma.parent.findUnique({
       where: { id: parentId },
       select: {
-        type: true,
         email: true,
         childIds: true,
       },
@@ -37,14 +36,12 @@ export async function acceptInvitation({
         message: "No child found, please create child first",
       };
     }
-    const type = existingParent.type === "FATHER" ? "MOTHER" : "FATHER";
     const hashedPassword = await hashing(password);
     const parent = await prisma.parent.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        type,
       },
     });
 
