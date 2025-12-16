@@ -13,7 +13,12 @@ export async function GET(
       return Res.badRequest({ message: "Parent & Child ID is required" });
     }
     const relations = await prisma.childRelation.findMany({
-      where: { childId, isDeleted: false },
+      where: {
+        childId: {
+          has: childId,
+        },
+        isDeleted: false,
+      },
       select: {
         id: true,
         name: true,

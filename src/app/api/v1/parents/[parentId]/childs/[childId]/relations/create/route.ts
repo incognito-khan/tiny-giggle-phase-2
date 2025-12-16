@@ -56,7 +56,7 @@ export async function POST(
         dateOfBirth,
         dateOfDeath,
         relation,
-        childId: existingChild.id,
+        childId: [existingChild.id],
         isDeleted: false
       },
     });

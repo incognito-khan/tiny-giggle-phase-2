@@ -40,9 +40,9 @@ export async function POST(
   req: NextRequest
 ): Promise<NextResponse<ApiResponse>> {
   try {
-    const { name, email, password, type } = await req.json();
+    const { name, email, password } = await req.json();
 
-    const result = signupSchema.safeParse({ name, email, password, type });
+    const result = signupSchema.safeParse({ name, email, password });
     if (!result.success) {
       const errors = formatZodErrors(result.error.format());
       return Res.badRequest({ message: "Validation failed", errors });
@@ -94,7 +94,6 @@ export async function POST(
         name,
         email,
         password: hashedPassword,
-        type,
         isDeleted: false
       },
     });

@@ -25,12 +25,22 @@ export async function DELETE(
             return Res.badRequest({ message: "This parent does not have the specified child." });
         }
 
+        // const childRelation = await prisma.childRelation.findFirst({
+        //     where: {
+        //         id: relativeId,
+        //         childId: childId,
+        //     },
+        // });
+
         const childRelation = await prisma.childRelation.findFirst({
             where: {
                 id: relativeId,
-                childId: childId,
+                childId: {
+                    has: childId,
+                },
             },
         });
+
 
         if (!childRelation) {
             return Res.badRequest({ message: "This child does not have the specified relation." });
