@@ -47,6 +47,9 @@ export const Res = {
   unauthorized: (opts: Omit<ResponseOptions, "status">) =>
     buildResponse({ ...opts, success: false, status: 401 }),
 
+  forbidden: (opts: Omit<ResponseOptions, "status">) =>
+    buildResponse({ ...opts, success: false, status: 403 }),
+
   notFound: (opts: Omit<ResponseOptions, "status">) =>
     buildResponse({ ...opts, success: false, status: 404 }),
 

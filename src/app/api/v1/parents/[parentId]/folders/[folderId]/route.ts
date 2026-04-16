@@ -1,20 +1,20 @@
 import { Res } from "@/lib/general-response";
 import { prisma } from "@/lib/prisma";
 import { NextRequest } from "next/server";
-import { uploadFileToS3 } from "@/lib/helpers/s3";
+import { getPresignedUrl, uploadFileToS3 } from "@/lib/helpers/s3";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ parentId: string; folderId: string }> }
+  { params }: { params: Promise<{ parentId: string; folderId: string }> },
 ) {
   try {
     const { parentId, folderId } = await params;
 
     const formData = await req.formData();
-    const file = formData.get("file") as File
+    const file = formData.get("file") as File;
 
     if (!file) {
-      return Res.badRequest({ message: "File is required" })
+      return Res.badRequest({ message: "File is required" });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -41,7 +41,6 @@ export async function POST(
       message: "Image uploaded and saved successfully",
       data: image,
     });
-
   } catch (error) {
     console.error(error);
     const message =
@@ -52,7 +51,7 @@ export async function POST(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ parentId: string; folderId: string }> }
+  { params }: { params: Promise<{ parentId: string; folderId: string }> },
 ) {
   try {
     const { parentId, folderId } = await params;
@@ -77,8 +76,8 @@ export async function GET(
     const deletedFolder = await prisma.folder.findUnique({
       where: { id: folderId },
       select: {
-        isDeleted: true
-      }
+        isDeleted: true,
+      },
     });
 
     if (!deletedFolder) {
@@ -91,7 +90,7 @@ export async function GET(
 
     const folder = await prisma.folder.findUnique({
       where: {
-        id: folderId
+        id: folderId,
       },
       select: {
         id: true,
@@ -119,38 +118,88 @@ export async function GET(
             images: {
               select: {
                 id: true,
-                url: true
-              }
-            }
+                url: true,
+              },
+            },
           },
           orderBy: {
             createdAt: "desc",
           },
-        }
-      }
-    })
+        },
+      },
+    });
 
-    const subfoldersWithCounts = await Promise.all(
+    if (!folder) {
+      return Res.badRequest({ message: "Folder not found" });
+    }
+
+    const imagesWithSignedUrls = await Promise.all(
+      folder.images.map(async (img) => {
+        const key = img.url.includes("amazonaws.com")
+          ? img.url.split(".amazonaws.com/")[1]
+          : img.url;
+
+        return {
+          ...img,
+          url: await getPresignedUrl(key),
+        };
+      }),
+    );
+
+    // const subfoldersWithCounts = await Promise.all(
+    //   folder.subfolders.map(async (sf) => {
+    //     const count = await prisma.image.count({
+    //       where: { folderId: sf.id },
+    //     });
+
+    //     return {
+    //       ...sf,
+    //       imageCount: count,
+    //     };
+    //   }),
+    // );
+
+    const subfoldersWithSignedUrls = await Promise.all(
       folder.subfolders.map(async (sf) => {
+        const images = await Promise.all(
+          sf.images.map(async (img) => {
+            const key = img.url.includes("amazonaws.com")
+              ? img.url.split(".amazonaws.com/")[1]
+              : img.url;
+
+            return {
+              ...img,
+              url: await getPresignedUrl(key),
+            };
+          }),
+        );
+
         const count = await prisma.image.count({
           where: { folderId: sf.id },
         });
 
         return {
           ...sf,
+          images,
           imageCount: count,
         };
-      })
+      }),
     );
 
-    const folderWithCount = {
+    // const folderWithCount = {
+    //   ...folder,
+    //   subfolders: subfoldersWithCounts,
+    // };
+
+    const folderWithSignedUrls = {
       ...folder,
-      subfolders: subfoldersWithCounts,
+      images: imagesWithSignedUrls,
+      subfolders: subfoldersWithSignedUrls,
     };
 
     return Res.ok({
       message: "Images fetched successfully",
-      data: folderWithCount,
+      data: folderWithSignedUrls,
     });
   } catch (error) {
     console.error(error);
@@ -162,21 +211,22 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ parentId: string; folderId: string }> }
+  { params }: { params: Promise<{ parentId: string; folderId: string }> },
 ) {
   try {
     const { parentId, folderId } = await params;
 
     if (!parentId) {
-      return Res.badRequest({ message: "Parent ID is required" })
-    };
+      return Res.badRequest({ message: "Parent ID is required" });
+    }
 
     const { name, type } = await req.json();
 
     const folder = await prisma.folder.update({
       where: { id: folderId },
       data: {
-        name, type
+        name,
+        type,
       },
       select: {
         id: true,
@@ -204,15 +254,15 @@ export async function PATCH(
             images: {
               select: {
                 id: true,
-                url: true
-              }
-            }
+                url: true,
+              },
+            },
           },
           orderBy: {
             createdAt: "desc",
           },
-        }
-      }
+        },
+      },
     });
 
     const subfoldersWithCounts = await Promise.all(
@@ -225,7 +275,7 @@ export async function PATCH(
           ...sf,
           imageCount: count,
         };
-      })
+      }),
     );
 
     const folderWithCount = {
@@ -233,9 +283,10 @@ export async function PATCH(
       subfolders: subfoldersWithCounts,
     };
 
-    return Res.success({ message: "Folder Updated Successfully", data: folderWithCount })
-
-
+    return Res.success({
+      message: "Folder Updated Successfully",
+      data: folderWithCount,
+    });
   } catch (error) {
     console.error(error);
     const message =
@@ -246,20 +297,20 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ parentId: string; folderId: string }> }
+  { params }: { params: Promise<{ parentId: string; folderId: string }> },
 ) {
   try {
     const { parentId, folderId } = await params;
 
     if (!parentId) {
-      return Res.badRequest({ message: "Parent ID is required" })
-    };
+      return Res.badRequest({ message: "Parent ID is required" });
+    }
 
     const folder = await prisma.folder.findUnique({
       where: { id: folderId },
       select: {
-        isDeleted: true
-      }
+        isDeleted: true,
+      },
     });
 
     if (!folder) {
@@ -274,13 +325,14 @@ export async function DELETE(
       where: { id: folderId },
       data: {
         isDeleted: true,
-        deletedAt: new Date()
+        deletedAt: new Date(),
       },
     });
 
-    return Res.success({ message: "Folder Deleted Successfully", data: folderId })
-
-
+    return Res.success({
+      message: "Folder Deleted Successfully",
+      data: folderId,
+    });
   } catch (error) {
     console.error(error);
     const message =

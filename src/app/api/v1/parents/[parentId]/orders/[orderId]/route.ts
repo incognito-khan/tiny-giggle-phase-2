@@ -2,6 +2,15 @@ import { ApiResponse } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 import { Res } from "@/lib/general-response";
 import { prisma } from "@/lib/prisma";
+import { getPresignedUrl } from "@/lib/helpers/s3";
+
+async function signUrl(url: string) {
+  const key = url.includes("amazonaws.com")
+    ? url.split(".amazonaws.com/")[1]
+    : url;
+
+  return getPresignedUrl(key);
+}
 
 export async function GET(
   req: NextRequest,
@@ -71,7 +80,20 @@ export async function GET(
       }
     });
 
-    return Res.ok({ message: "Order fetched successfully", data: order });
+    const orderWithSignedUrls = {
+      ...order,
+      orderItems: await Promise.all(
+        order.orderItems.map(async (item) => ({
+          ...item,
+          product: {
+            ...item.product,
+            image: await signUrl(item.product.image),
+          },
+        })),
+      ),
+    };
+
+    return Res.ok({ message: "Order fetched successfully", data: orderWithSignedUrls });
   } catch (error) {
     return Res.serverError();
   }
@@ -132,7 +154,20 @@ export async function PATCH(
       }
     });
 
-    return Res.ok({ message: "Order updated successfully", data: updatedOrder });
+    const updatedOrderWithSignedUrls = {
+      ...updatedOrder,
+      orderItems: await Promise.all(
+        updatedOrder.orderItems.map(async (item) => ({
+          ...item,
+          product: {
+            ...item.product,
+            image: await signUrl(item.product.image),
+          },
+        })),
+      ),
+    };
+
+    return Res.ok({ message: "Order updated successfully", data: updatedOrderWithSignedUrls });
   } catch (error) {
     console.error(error);
     return Res.serverError({ message: "Internal Server Error" });

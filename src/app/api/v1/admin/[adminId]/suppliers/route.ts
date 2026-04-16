@@ -16,10 +16,13 @@ export async function POST(
             return Res.badRequest({ message: "Please Provide Admin ID" })
         }
 
-        const { name, cnic, email, country, state, city, status, subscription, categoryId, subCategoryId } = await req.json();
+        const {
+            name, cnic, email, country, state, city, status, subscription, categoryId, subCategoryId,
+            nationalId, businessRegistration, taxId, productCatalog, insurance
+        } = await req.json();
 
         if (!name || !cnic || !email || !country || !state || !city || !status || !categoryId || !subCategoryId) {
-            return Res.badRequest({ message: "All fields are requried." });
+            return Res.badRequest({ message: "Required fields are missing." });
         }
 
         const password = nanoid(8);
@@ -39,6 +42,13 @@ export async function POST(
                 categoryId,
                 subCategoryId,
                 password: hashedPassword,
+                nationalId,
+                businessRegistration,
+                taxId,
+                productCatalog,
+                insurance,
+                isVerified: true,
+                isPaid: false,
                 isDeleted: false
             },
             select: {
@@ -114,6 +124,13 @@ export async function GET(
                 city: true,
                 subscription: true,
                 status: true,
+                nationalId: true,
+                businessRegistration: true,
+                taxId: true,
+                productCatalog: true,
+                insurance: true,
+                isVerified: true,
+                isPaid: true,
                 category: {
                     select: {
                         id: true,

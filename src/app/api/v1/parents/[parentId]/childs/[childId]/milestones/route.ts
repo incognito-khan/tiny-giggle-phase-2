@@ -2,10 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Res } from "@/lib/general-response";
 import { ApiResponse } from "@/lib/types";
+import { getPresignedUrl } from "@/lib/helpers/s3";
+
+async function signUrl(url: string) {
+  const key = url.includes("amazonaws.com")
+    ? url.split(".amazonaws.com/")[1]
+    : url;
+
+  return getPresignedUrl(key);
+}
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ parentId: string; childId: string }> }
+  { params }: { params: Promise<{ parentId: string; childId: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const { parentId, childId } = await params;
@@ -47,9 +56,22 @@ export async function GET(
       }),
     }));
 
+    const milestonesWithSignedUrls = await Promise.all(
+      milestones.map(async (milestone) => ({
+        ...milestone,
+        imageUrl: await signUrl(milestone.imageUrl),
+        subMilestones: await Promise.all(
+          milestone.subMilestones.map(async (subMilestone) => ({
+            ...subMilestone,
+            imageUrl: await signUrl(subMilestone.imageUrl),
+          })),
+        ),
+      })),
+    );
+
     return Res.success({
       message: "Milestones fetched successfully",
-      data: result,
+      data: milestonesWithSignedUrls,
     });
   } catch (error) {
     console.error(error);

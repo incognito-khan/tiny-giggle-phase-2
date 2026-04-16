@@ -2,16 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Res } from "@/lib/general-response";
 import { ApiResponse } from "@/lib/types";
+import { getPresignedUrl } from "@/lib/helpers/s3";
+
+async function signUrl(url: string) {
+  const key = url.includes("amazonaws.com")
+    ? url.split(".amazonaws.com/")[1]
+    : url;
+
+  return getPresignedUrl(key);
+}
 
 export async function POST(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const body = await req.json();
     const { name, slug, adminId, status } = body;
 
     if (!name || !slug || !adminId || !status) {
-      return Res.badRequest({ message: "Name, status, slug and adminId are required" });
+      return Res.badRequest({
+        message: "Name, status, slug and adminId are required",
+      });
     }
 
     const category = await prisma.musicCategory.create({
@@ -20,7 +31,7 @@ export async function POST(
         slug,
         adminId,
         status: status || "ACTIVE",
-        isDeleted: false
+        isDeleted: false,
       },
       // include: {
       //   _count: {
@@ -43,7 +54,7 @@ export async function POST(
 
     return Res.success({
       message: "Music Category created successfully",
-      data: categoryWithCount
+      data: categoryWithCount,
     });
   } catch (error: any) {
     if (error.code === "P2002") {
@@ -57,7 +68,7 @@ export async function POST(
 }
 
 export async function GET(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const url = new URL(req.url);
@@ -85,27 +96,35 @@ export async function GET(
           select: {
             id: true,
             name: true,
-            email: true
-          }
+            email: true,
+          },
         },
         category: {
           select: {
             id: true,
-            name: true
-          }
+            name: true,
+          },
         },
         subCategory: {
           select: {
             id: true,
-            name: true
-          }
-        }
-      }
+            name: true,
+          },
+        },
+      },
     });
+
+    const signedMusics = await Promise.all(
+      musics.map(async (music) => ({
+        ...music,
+        url: await signUrl(music.url),
+        thumbnail: music.thumbnail ? await signUrl(music.thumbnail) : null,
+      })),
+    );
 
     return Res.success({
       message: "All music fetched successfully",
-      data: musics,
+      data: signedMusics,
     });
   } catch (error) {
     console.error("Music fetch error:", error);

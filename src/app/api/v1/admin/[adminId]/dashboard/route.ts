@@ -16,6 +16,8 @@ export async function GET(
       // Users
       totalParents,
       totalChildren,
+      totalDoctors,
+      totalBabysitters,
 
       // Artists
       totalArtists,
@@ -41,11 +43,18 @@ export async function GET(
       // Milestones
       totalMilestones,
 
-      // Vaccinations
       totalVaccinations,
+
+      // Paid Subscriptions
+      paidArtists,
+      paidSuppliers,
+      paidDoctors,
+      paidBabysitters,
     ] = await Promise.all([
       prisma.parent.count({ where: { isDeleted: false } }),
       prisma.child.count({ where: { isDeleted: false } }),
+      prisma.doctor.count({ where: { isDeleted: false } }),
+      prisma.babysitter.count({ where: { isDeleted: false } }),
 
       prisma.artist.count({ where: { isDeleted: false } }),
       prisma.artist.count({ where: { isDeleted: false, status: "ACTIVE" } }),
@@ -76,16 +85,23 @@ export async function GET(
 
       prisma.subMilestone.count(),
       prisma.vaccination.count(),
+
+      prisma.artist.count({ where: { isDeleted: false, isPaid: true } }),
+      prisma.supplier.count({ where: { isDeleted: false, isPaid: true } }),
+      prisma.doctor.count({ where: { isDeleted: false, isPaid: true } }),
+      prisma.babysitter.count({ where: { isDeleted: false, isPaid: true } }),
     ]);
 
-    // Calculate revenue & purchases per music for charts
-    const revenuePerMusicMap: Record<string, { title: string; revenue: number }> = {};
-    purchasedMusicRaw.forEach((p) => {
-      if (!p.music) return;
-      if (!revenuePerMusicMap[p.music.id]) revenuePerMusicMap[p.music.id] = { title: p.music.title, revenue: 0 };
-      revenuePerMusicMap[p.music.id].revenue += p.music.price || 0;
-    });
-    const revenuePerMusic = Object.entries(revenuePerMusicMap).map(([musicId, data]) => ({ musicId, ...data }));
+    // Calculate role subscription earnings based on isPaid status
+    const SUBSCRIPTION_FEE = 5;
+
+    const subscriptionBreakdown = {
+      artist: paidArtists * SUBSCRIPTION_FEE,
+      supplier: paidSuppliers * SUBSCRIPTION_FEE,
+      doctor: paidDoctors * SUBSCRIPTION_FEE,
+      babysitter: paidBabysitters * SUBSCRIPTION_FEE,
+    };
+    const totalSubscriptionEarnings = Object.values(subscriptionBreakdown).reduce((a, b) => a + b, 0);
 
     // Prepare monthly orders for chart
     const monthlyOrders = monthlyOrdersRaw.map((m) => ({
@@ -97,7 +113,7 @@ export async function GET(
     return Res.ok({
       message: "Admin dashboard data fetched successfully",
       data: {
-        users: { totalParents, totalChildren },
+        users: { totalParents, totalChildren, totalDoctors, totalBabysitters },
 
         artists: {
           totalArtists,
@@ -106,8 +122,7 @@ export async function GET(
           totalPaidMusic,
           totalFreeMusic,
           totalPurchases: purchasedMusicRaw.length,
-          totalEarnings: revenuePerMusic.reduce((sum, m) => sum + m.revenue, 0),
-          revenuePerMusic,
+          totalEarnings: purchasedMusicRaw.reduce((sum, p) => sum + (p.music?.price || 0), 0),
         },
 
         suppliers: {
@@ -131,6 +146,11 @@ export async function GET(
 
         vaccinations: {
           totalVaccinations,
+        },
+
+        subscriptions: {
+          totalEarnings: totalSubscriptionEarnings,
+          breakdown: subscriptionBreakdown,
         },
       },
     });

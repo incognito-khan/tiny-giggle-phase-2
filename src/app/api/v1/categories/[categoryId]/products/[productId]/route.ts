@@ -2,10 +2,19 @@ import { Res } from "@/lib/general-response";
 import { prisma } from "@/lib/prisma";
 import { ApiResponse } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
+import { getPresignedUrl } from "@/lib/helpers/s3";
+
+async function signUrl(url: string) {
+  const key = url.includes("amazonaws.com")
+    ? url.split(".amazonaws.com/")[1]
+    : url;
+
+  return getPresignedUrl(key);
+}
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ categoryId: string; productId: string }> }
+  { params }: { params: Promise<{ categoryId: string; productId: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const { categoryId, productId } = await params;
@@ -15,11 +24,11 @@ export async function GET(
 
     const checkProduct = await prisma.product.findUnique({
       where: { id: productId },
-      select: { isDeleted: true }
+      select: { isDeleted: true },
     });
 
     if (!checkProduct || checkProduct.isDeleted) {
-      return Res.badRequest({ message: "Product Not Found" })
+      return Res.badRequest({ message: "Product Not Found" });
     }
 
     const product = await prisma.product.findUnique({
@@ -36,14 +45,20 @@ export async function GET(
         listedBy: {
           select: {
             id: true,
-            name: true
-          }
-        }
+            name: true,
+          },
+        },
       },
     });
+
+    const signedUrl = await signUrl(product.image);
+
     return Res.success({
       message: "Single product fetch successfully",
-      data: product,
+      data: {
+        ...product,
+        image: signedUrl,
+      },
     });
   } catch (error) {
     return Res.serverError();
@@ -52,7 +67,7 @@ export async function GET(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ productId: string }> }
+  { params }: { params: Promise<{ productId: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const { productId } = await params;
@@ -105,8 +120,8 @@ export async function DELETE(
       where: { id: productId },
       data: {
         isDeleted: true,
-        deletedAt: new Date()
-      }
+        deletedAt: new Date(),
+      },
     });
 
     return Res.success({
@@ -121,7 +136,7 @@ export async function DELETE(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ productId: string; categoryId: string }> }
+  { params }: { params: Promise<{ productId: string; categoryId: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const { productId, categoryId } = await params;
@@ -134,7 +149,16 @@ export async function PATCH(
       return Res.badRequest({ message: "Category ID is required" });
     }
 
-    const { name, slug, image, quantity, costPrice, salePrice, taxPercent, subCategoryId } = await req.json();
+    const {
+      name,
+      slug,
+      image,
+      quantity,
+      costPrice,
+      salePrice,
+      taxPercent,
+      subCategoryId,
+    } = await req.json();
 
     if (!subCategoryId) {
       return Res.badRequest({ message: "Sub Category ID is required" });
@@ -154,30 +178,42 @@ export async function PATCH(
 
     const updatedProduct = await prisma.product.update({
       where: { id: productId },
-      data: { name, slug, image, quantity, costPrice, salePrice, taxPercent, subCategoryId, categoryId },
+      data: {
+        name,
+        slug,
+        image,
+        quantity,
+        costPrice,
+        salePrice,
+        taxPercent,
+        subCategoryId,
+        categoryId,
+      },
       include: {
         category: {
           select: {
             id: true,
             name: true,
             slug: true,
-          }
+          },
         },
         subCategory: {
           select: {
             id: true,
             name: true,
-            slug: true
-          }
+            slug: true,
+          },
         },
         listedBy: {
           select: {
             id: true,
-            name: true
-          }
-        }
+            name: true,
+          },
+        },
       },
     });
+
+    const signedUrl = await signUrl(updatedProduct.image);
 
     return Res.success({
       message: "Product updated successfully",
@@ -185,19 +221,17 @@ export async function PATCH(
         id: updatedProduct.id,
         name: updatedProduct.name,
         slug: updatedProduct.slug,
-        image: updatedProduct.image,
+        image: signedUrl,
         costPrice: updatedProduct.costPrice,
         salePrice: updatedProduct.salePrice,
         quantity: updatedProduct.quantity,
         taxPercent: updatedProduct.taxPercent,
         category: updatedProduct.category,
         subCategory: updatedProduct.subCategory,
-        listedBy: updatedProduct.listedBy
+        listedBy: updatedProduct.listedBy,
       },
     });
-
   } catch (error) {
     return Res.serverError();
   }
 }
-

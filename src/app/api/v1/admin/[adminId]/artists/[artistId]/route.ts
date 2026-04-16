@@ -18,7 +18,10 @@ export async function PATCH(
             return Res.badRequest({ message: "Please Provide Artist ID" })
         }
 
-        const { name, cnic, email, country, state, city, status, subscription, categoryId, subCategoryId } = await req.json();
+        const { 
+            name, cnic, email, country, state, city, status, subscription, categoryId, subCategoryId,
+            isVerified, isPaid, nationalId, portfolio, copyrightCertificates, exhibitionRecords, bankDetails
+        } = await req.json();
 
         if (!name || !cnic || !email || !country || !state || !city || !status || !categoryId || !subCategoryId) {
             return Res.badRequest({ message: "All fields are requried." });
@@ -36,7 +39,14 @@ export async function PATCH(
                 city,
                 subscription,
                 categoryId,
-                subCategoryId
+                subCategoryId,
+                isVerified,
+                isPaid,
+                nationalId,
+                portfolio,
+                copyrightCertificates,
+                exhibitionRecords,
+                bankDetails
             },
             select: {
                 id: true,
@@ -48,6 +58,13 @@ export async function PATCH(
                 status: true,
                 city: true,
                 subscription: true,
+                isVerified: true,
+                isPaid: true,
+                nationalId: true,
+                portfolio: true,
+                copyrightCertificates: true,
+                exhibitionRecords: true,
+                bankDetails: true,
                 category: {
                     select: {
                         id: true,

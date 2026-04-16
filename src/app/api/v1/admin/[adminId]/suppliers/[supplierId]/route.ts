@@ -18,7 +18,10 @@ export async function PATCH(
             return Res.badRequest({ message: "Please Provide Supplier ID" })
         }
 
-        const { name, cnic, email, country, state, city, status, subscription, categoryId, subCategoryId } = await req.json();
+        const {
+            name, cnic, email, country, state, city, status, subscription, categoryId, subCategoryId,
+            nationalId, businessRegistration, taxId, productCatalog, insurance, isVerified, isPaid
+        } = await req.json();
 
         if (!name || !cnic || !email || !country || !state || !city || !status || !categoryId || !subCategoryId) {
             return Res.badRequest({ message: "All fields are requried." });
@@ -27,16 +30,17 @@ export async function PATCH(
         const supplier = await prisma.supplier.update({
             where: { id: supplierId },
             data: {
-                name,
-                cnic,
-                email,
-                country,
-                state,
-                status,
                 city,
                 subscription,
                 categoryId,
-                subCategoryId
+                subCategoryId,
+                nationalId,
+                businessRegistration,
+                taxId,
+                productCatalog,
+                insurance,
+                isVerified,
+                isPaid
             },
             select: {
                 id: true,
@@ -48,6 +52,13 @@ export async function PATCH(
                 status: true,
                 city: true,
                 subscription: true,
+                nationalId: true,
+                businessRegistration: true,
+                taxId: true,
+                productCatalog: true,
+                insurance: true,
+                isVerified: true,
+                isPaid: true,
                 category: {
                     select: {
                         id: true,

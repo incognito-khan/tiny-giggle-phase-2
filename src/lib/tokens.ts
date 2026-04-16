@@ -6,7 +6,7 @@ import { ApiResponse } from "./types";
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!;
 
-console.log(ACCESS_TOKEN_SECRET, 'access token secret')
+console.log(ACCESS_TOKEN_SECRET, "access token secret");
 
 type TokenPayload = {
   id: string;
@@ -17,6 +17,7 @@ type TokenPayload = {
 
 // 🔐 Create JWT Access Token
 export async function createAccessToken(user: any): Promise<string> {
+  console.log(user, "user in token.ts");
   const payload: TokenPayload = {
     id: user.id,
     name: user.name,
@@ -39,7 +40,7 @@ export async function verifyAccessToken(token: string) {
   try {
     const verified = await jwtVerify(
       token,
-      new TextEncoder().encode(ACCESS_TOKEN_SECRET)
+      new TextEncoder().encode(ACCESS_TOKEN_SECRET),
     );
     return verified.payload as TokenPayload;
   } catch (error) {
@@ -49,7 +50,7 @@ export async function verifyAccessToken(token: string) {
 
 // ✅ Extract and verify token from request
 export async function verifyAccessTokenFromRequest(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<ApiResponse> {
   try {
     let token: string | undefined;
@@ -60,7 +61,7 @@ export async function verifyAccessTokenFromRequest(
       token = authHeader.split(" ")[1];
     }
 
-    console.log(authHeader, token, 'authHeader, token')
+    // console.log(authHeader, token, 'authHeader, token')
 
     // 2. Else fallback to cookie
     if (!token) {
@@ -75,6 +76,8 @@ export async function verifyAccessTokenFromRequest(
     if (!payload) {
       return { success: false, message: "Token is invalid or expired" };
     }
+
+    console.log(payload, "payload in token.ts");
 
     return {
       success: true,

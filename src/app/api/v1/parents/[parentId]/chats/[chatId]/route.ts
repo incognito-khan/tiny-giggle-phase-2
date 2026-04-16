@@ -94,13 +94,15 @@ export async function POST(
     if (!content && !imageBase64 && !voiceBase64)
       return Res.badRequest({ message: "Message, image, or voice is required" });
 
-    // Find participant — Parent OR ChildRelation
+    // Find participant — Parent OR ChildRelation OR Doctor OR Babysitter
     const participant = await prisma.chatParticipant.findFirst({
       where: {
         chatId,
         OR: [
           { parentId: senderId },
-          { childRelationId: senderId }
+          { childRelationId: senderId },
+          { doctorId: senderId },
+          { babysitterId: senderId },
         ],
       },
       include: {
@@ -109,6 +111,12 @@ export async function POST(
         },
         childRelation: {
           select: { id: true, name: true, relation: true },
+        },
+        doctor: {
+          select: { id: true, name: true },
+        },
+        babysitter: {
+          select: { id: true, name: true },
         },
       },
     });
@@ -120,7 +128,7 @@ export async function POST(
     }
 
     // Determine sender automatically
-    const sender = participant.parent || participant.childRelation;
+    const sender = participant.parent || participant.childRelation || participant.doctor || participant.babysitter;
 
     if (!sender) {
       return Res.serverError({
@@ -245,6 +253,12 @@ export async function GET(
             childRelation: {
               select: { id: true, name: true, email: true, relation: true },
             },
+            doctor: {
+              select: { id: true, name: true },
+            },
+            babysitter: {
+              select: { id: true, name: true },
+            },
           },
         },
       },
@@ -252,9 +266,8 @@ export async function GET(
 
     // Normalize sender
     const formatted = messages.map((msg) => {
-      const sender =
-        msg.chatParticipant.parent ||
-        msg.chatParticipant.childRelation;
+      const cp = msg.chatParticipant;
+      const sender = cp.parent || cp.childRelation || cp.doctor || cp.babysitter;
 
       return {
         id: msg.id,
@@ -265,7 +278,13 @@ export async function GET(
         senderId: sender?.id || null,
         senderName: sender?.name || "Unknown Sender",
         createdAt: msg.createdAt,
-        senderType: msg.chatParticipant.parent ? "PARENT" : "CHILD_RELATION",
+        senderType: cp.parent
+          ? "PARENT"
+          : cp.doctor
+            ? "DOCTOR"
+            : cp.babysitter
+              ? "BABYSITTER"
+              : "CHILD_RELATION",
       };
     });
 

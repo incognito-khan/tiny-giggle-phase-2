@@ -1,6 +1,15 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Res } from "@/lib/general-response";
+import { getPresignedUrl } from "@/lib/helpers/s3";
+
+async function signUrl(url: string) {
+    const key = url.includes("amazonaws.com")
+        ? url.split(".amazonaws.com/")[1]
+        : url;
+
+    return getPresignedUrl(key);
+}
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ parentId: string }> }) {
     try {
@@ -50,7 +59,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ pare
             },
         });
 
-        return Res.ok({ message: "Cart items fetched successfully", data: cartItems });
+        const cartItemsWithSignedUrls = await Promise.all(
+            cartItems.map(async (item) => ({
+                ...item,
+                product: {
+                    ...item.product,
+                    image: await signUrl(item.product.image),
+                },
+            })),
+        );
+
+        return Res.ok({ message: "Cart items fetched successfully", data: cartItemsWithSignedUrls });
 
     } catch (error) {
         console.error("Cart GET error:", error);

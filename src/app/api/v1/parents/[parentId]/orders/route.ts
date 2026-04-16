@@ -2,6 +2,15 @@ import { ApiResponse } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 import { Res } from "@/lib/general-response";
 import { prisma } from "@/lib/prisma";
+import { getPresignedUrl } from "@/lib/helpers/s3";
+
+async function signUrl(url: string) {
+  const key = url.includes("amazonaws.com")
+    ? url.split(".amazonaws.com/")[1]
+    : url;
+
+  return getPresignedUrl(key);
+}
 
 export async function GET(
   req: NextRequest,
@@ -52,7 +61,22 @@ export async function GET(
         },
       });
 
-      return Res.ok({ message: "Orders fetched successfully", data: orders });
+      const ordersWithSignedUrls = await Promise.all(
+        orders.map(async (order) => ({
+          ...order,
+          orderItems: await Promise.all(
+            order.orderItems.map(async (item) => ({
+              ...item,
+              product: {
+                ...item.product,
+                image: await signUrl(item.product.image),
+              },
+            })),
+          ),
+        })),
+      );
+
+      return Res.ok({ message: "Orders fetched successfully", data: ordersWithSignedUrls });
     }
 
     const existingRelative = await prisma.childRelation.findUnique({
@@ -94,7 +118,22 @@ export async function GET(
         },
       });
 
-      return Res.ok({ message: "Orders fetched successfully", data: orders });
+      const ordersWithSignedUrls = await Promise.all(
+        orders.map(async (order) => ({
+          ...order,
+          orderItems: await Promise.all(
+            order.orderItems.map(async (item) => ({
+              ...item,
+              product: {
+                ...item.product,
+                image: await signUrl(item.product.image),
+              },
+            })),
+          ),
+        })),
+      );
+
+      return Res.ok({ message: "Orders fetched successfully", data: ordersWithSignedUrls });
     }
 
     if (!existingParent && !existingRelative) {

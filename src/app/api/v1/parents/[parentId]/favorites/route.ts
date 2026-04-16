@@ -2,6 +2,15 @@ import { Res } from "@/lib/general-response";
 import { prisma } from "@/lib/prisma";
 import { verifyAccessTokenFromRequest } from "@/lib/tokens";
 import { NextRequest } from "next/server";
+import { getPresignedUrl } from "@/lib/helpers/s3";
+
+async function signUrl(url: string) {
+    const key = url.includes("amazonaws.com")
+        ? url.split(".amazonaws.com/")[1]
+        : url;
+
+    return getPresignedUrl(key);
+}
 
 export async function GET(
     req: NextRequest,
@@ -76,6 +85,16 @@ export async function GET(
             orderBy: { createdAt: "desc" },
         });
 
+        const productFavoritesWithSignedUrls = await Promise.all(
+            productFavorites.map(async (favorite) => ({
+                ...favorite,
+                product: {
+                    ...favorite.product,
+                    image: await signUrl(favorite.product.image),
+                },
+            })),
+        );
+
         const musicFavorites = await prisma.musicFavorite.findMany({
             where: existingParent
                 ? {
@@ -103,9 +122,20 @@ export async function GET(
             orderBy: { createdAt: "desc" },
         });
 
+        const musicFavoritesWithSignedUrls = await Promise.all(
+            musicFavorites.map(async (favorite) => ({
+                ...favorite,
+                music: {
+                    ...favorite.music,
+                    thumbnail: await signUrl(favorite.music.thumbnail),
+                    url: await signUrl(favorite.music.url),
+                },
+            })),
+        );
+
         return Res.success({
             message: "Favorites fetched successfully",
-            data: { productFavorites, musicFavorites },
+            data: { productFavorites: productFavoritesWithSignedUrls, musicFavorites: musicFavoritesWithSignedUrls },
         });
     } catch (error) {
         console.error("Favorites GET error:", error);

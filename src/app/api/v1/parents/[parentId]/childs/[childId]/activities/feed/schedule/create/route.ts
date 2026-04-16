@@ -30,7 +30,7 @@ export async function POST(
         date: new Date(date),
         feedSlots: {
           create: feeds.map((f: any) => ({
-            feedTime: new Date(f.feedTime),
+            feedTime: new Date(f.feedTime.includes("T") ? f.feedTime : `${date}T${f.feedTime}:00`),
             feedType: f.feedType,
             feedName: f.feedName,
             amount: parseFloat(f.amount),

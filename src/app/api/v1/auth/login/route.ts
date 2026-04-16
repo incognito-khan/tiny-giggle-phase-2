@@ -6,11 +6,12 @@ import { formatZodErrors } from "@/lib/helpers/zodErrorFormat";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/schemas/login";
 import { createAccessToken } from "@/lib/tokens";
+import { prepareUser } from "@/lib/prepare-user";
 import { ApiResponse } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const { email, password, browser, location, os, time } = await req.json();
@@ -43,6 +44,9 @@ export async function POST(
           where: { isDeleted: false },
           select: {
             id: true,
+            name: true,
+            avatar: true,
+            type: true,
           },
         },
         folders: {
@@ -55,11 +59,11 @@ export async function POST(
             subfolders: {
               where: { isDeleted: false },
               select: {
-                id: true
-              }
+                id: true,
+              },
             },
-            createdAt: true
-          }
+            createdAt: true,
+          },
         },
         carts: {
           where: { isDeleted: false },
@@ -84,8 +88,8 @@ export async function POST(
               },
             },
           },
-        }
-      }
+        },
+      },
     });
 
     if (existingUser && !existingUser?.isDeleted) {
@@ -94,14 +98,17 @@ export async function POST(
         return Res.notFound({ message: "Invalid email or password" });
       }
 
-
       if (!existingUser.isVerified) {
         return Res.badRequest({
           message: "Please check your email and verify your account",
         });
       }
 
-      const accessToken = await createAccessToken(existingUser);
+      const user = { ...existingUser, role: "parent" };
+
+      const accessToken = await createAccessToken(user);
+      const preparedUser = await prepareUser(existingUser, "parent");
+
       await sendEmail(existingUser.email, "new-login-detected", {
         name: existingUser.name,
         browser,
@@ -110,42 +117,38 @@ export async function POST(
         time,
       });
 
-
       await createMessage({
         title: "New Login Detected",
         parentId: existingUser.id,
-        role: 'parent'
+        role: "parent",
       });
-
 
       return Res.ok({
         message: "Successfully logged in",
         data: {
-          user: {
-            id: existingUser.id,
-            name: existingUser.name,
-            email: existingUser.email,
-            childs: existingUser.childIds,
-            folders: existingUser.folders,
-            carts: existingUser.carts,
-            role: "parent"
-          },
+          user: preparedUser,
           tokens: {
             accessToken,
           },
         },
       });
-
     }
 
     const existingAdmin = await prisma.admin.findUnique({
       where: {
-        email
-      }
+        email,
+      },
     });
 
     if (existingAdmin) {
+      const isMatch = password === existingAdmin.password;
+      if (!isMatch) {
+        return Res.notFound({ message: "Invalid email or password" });
+      }
+
       const accessToken = await createAccessToken(existingAdmin);
+      const preparedUser = await prepareUser(existingAdmin, "admin");
+
       await sendEmail(existingAdmin.email, "new-login-detected", {
         name: existingAdmin.name,
         browser,
@@ -157,36 +160,25 @@ export async function POST(
       await createMessage({
         title: "New Login Detected",
         parentId: existingAdmin.id,
-        role: 'admin'
+        role: "admin",
       });
-
 
       return Res.ok({
         message: "Successfully logged in",
         data: {
-          user: {
-            id: existingAdmin.id,
-            name: existingAdmin.name,
-            email: existingAdmin.email,
-            role: "admin"
-          },
+          user: preparedUser,
           tokens: {
             accessToken,
           },
         },
       });
-
     }
 
-
-    if ((!existingUser || existingUser.isDeleted) && (!existingAdmin)) {
+    if ((!existingUser || existingUser.isDeleted) && !existingAdmin) {
       return Res.notFound({ message: "Invalid email or password" });
     }
-
-
-
   } catch (error) {
-    console.error(error)
+    console.error(error);
     const message =
       error instanceof Error ? error.message : "Internal server error";
     return Res.serverError({ message });

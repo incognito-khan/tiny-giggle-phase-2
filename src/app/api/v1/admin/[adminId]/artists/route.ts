@@ -16,7 +16,10 @@ export async function POST(
             return Res.badRequest({ message: "Please Provide Admin ID" })
         }
 
-        const { name, cnic, email, country, state, city, status, subscription, categoryId, subCategoryId } = await req.json();
+        const { 
+            name, cnic, email, country, state, city, status, subscription, categoryId, subCategoryId,
+            nationalId, portfolio, copyrightCertificates, exhibitionRecords, bankDetails
+        } = await req.json();
 
         if (!name || !cnic || !email || !country || !state || !city || !status || !categoryId || !subCategoryId) {
             return Res.badRequest({ message: "All fields are requried." });
@@ -39,7 +42,13 @@ export async function POST(
                 categoryId,
                 subCategoryId,
                 password: hashedPassword,
-                isDeleted: false
+                isDeleted: false,
+                isVerified: true, // Defaulting to true for admin-created artists
+                nationalId,
+                portfolio,
+                copyrightCertificates,
+                exhibitionRecords,
+                bankDetails
             },
             select: {
                 id: true,
@@ -51,6 +60,13 @@ export async function POST(
                 status: true,
                 city: true,
                 subscription: true,
+                isVerified: true,
+                isPaid: true,
+                nationalId: true,
+                portfolio: true,
+                copyrightCertificates: true,
+                exhibitionRecords: true,
+                bankDetails: true,
                 category: {
                     select: {
                         id: true,
@@ -115,6 +131,13 @@ export async function GET(
                 city: true,
                 subscription: true,
                 status: true,
+                isVerified: true,
+                isPaid: true,
+                nationalId: true,
+                portfolio: true,
+                copyrightCertificates: true,
+                exhibitionRecords: true,
+                bankDetails: true,
                 category: {
                     select: {
                         id: true,

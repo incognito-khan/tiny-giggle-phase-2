@@ -6,11 +6,12 @@ import { formatZodErrors } from "@/lib/helpers/zodErrorFormat";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/schemas/login";
 import { createAccessToken } from "@/lib/tokens";
+import { prepareUser } from "@/lib/prepare-user";
 import { ApiResponse } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const { email, password, browser, location, os, time } = await req.json();
@@ -46,7 +47,11 @@ export async function POST(
         return Res.notFound({ message: "Invalid email or password" });
       }
 
-      const accessToken = await createAccessToken(existingUser);
+      const user = { ...existingUser, role: "artist" };
+
+      const accessToken = await createAccessToken(user);
+      const preparedUser = await prepareUser(user, "artist");
+
       await sendEmail(existingUser.email, "new-login-detected", {
         name: existingUser.name,
         browser,
@@ -55,40 +60,28 @@ export async function POST(
         time,
       });
 
-
       await createMessage({
         title: "New Login Detected",
         parentId: existingUser.id,
-        role: 'artist'
+        role: "artist",
       });
-
 
       return Res.ok({
         message: "Successfully logged in",
         data: {
-          user: {
-            id: existingUser.id,
-            name: existingUser.name,
-            email: existingUser.email,
-            categoryId: existingUser.categoryId,
-            subCategoryId: existingUser.subCategoryId,
-            role: 'artist'
-          },
+          user: preparedUser,
           tokens: {
             accessToken,
           },
         },
       });
-
     }
-
 
     if (!existingUser || existingUser.isDeleted) {
       return Res.notFound({ message: "Invalid email or password" });
     }
-
   } catch (error) {
-    console.error(error)
+    console.error(error);
     const message =
       error instanceof Error ? error.message : "Internal server error";
     return Res.serverError({ message });

@@ -35,7 +35,7 @@ export interface EmailTemplateProps {
     name: string;
     email: string;
     password: string;
-    role: "Artist" | "Supplier"
+    role: "Artist" | "Supplier" | "Doctor" | "Babysitter"
   };
   "new-relative-account": {
     inviterName: string;

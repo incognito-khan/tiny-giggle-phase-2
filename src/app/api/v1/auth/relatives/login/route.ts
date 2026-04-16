@@ -6,11 +6,12 @@ import { formatZodErrors } from "@/lib/helpers/zodErrorFormat";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/schemas/login";
 import { createAccessToken } from "@/lib/tokens";
+import { prepareUser } from "@/lib/prepare-user";
 import { ApiResponse } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const { email, password, browser, location, os, time } = await req.json();
@@ -37,14 +38,14 @@ export async function POST(
     const existingUser = await prisma.childRelation.findFirst({
       where: {
         email,
-        isDeleted: false
+        isDeleted: false,
       },
       include: {
         child: {
           select: {
             id: true,
           },
-        }
+        },
       },
     });
 
@@ -55,6 +56,8 @@ export async function POST(
       }
 
       const accessToken = await createAccessToken(existingUser);
+      const preparedUser = await prepareUser(existingUser, "relative");
+
       await sendEmail(existingUser.email, "new-login-detected", {
         name: existingUser.name,
         browser,
@@ -63,39 +66,28 @@ export async function POST(
         time,
       });
 
-
       await createMessage({
         title: "New Login Detected",
         parentId: existingUser.id,
-        role: 'relative'
+        role: "relative",
       });
-
 
       return Res.ok({
         message: "Successfully logged in",
         data: {
-          user: {
-            id: existingUser.id,
-            name: existingUser.name,
-            email: existingUser.email,
-            childs: existingUser.childId,
-            role: "relative"
-          },
+          user: preparedUser,
           tokens: {
             accessToken,
           },
         },
       });
-
     }
-
 
     if (!existingUser || existingUser.isDeleted) {
       return Res.notFound({ message: "Invalid email or password" });
     }
-
   } catch (error) {
-    console.error(error)
+    console.error(error);
     const message =
       error instanceof Error ? error.message : "Internal server error";
     return Res.serverError({ message });

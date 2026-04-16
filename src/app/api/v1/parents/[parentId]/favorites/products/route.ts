@@ -2,6 +2,15 @@ import { Res } from "@/lib/general-response";
 import { prisma } from "@/lib/prisma";
 import { verifyAccessTokenFromRequest } from "@/lib/tokens";
 import { NextRequest } from "next/server";
+import { getPresignedUrl } from "@/lib/helpers/s3";
+
+async function signUrl(url: string) {
+    const key = url.includes("amazonaws.com")
+        ? url.split(".amazonaws.com/")[1]
+        : url;
+
+    return getPresignedUrl(key);
+}
 
 export async function POST(
     req: NextRequest,
@@ -62,10 +71,22 @@ export async function POST(
                         parentId,
                         productId,
                     },
+                    include: {
+                        product: true
+                    }
                 });
+
+                const favoriteWithSignedUrl = {
+                    ...favorite,
+                    product: {
+                        ...favorite.product,
+                        image: await signUrl(favorite.product.image),
+                    },
+                };
+
                 return Res.created({
                     message: "Added to favorites",
-                    data: favorite,
+                    data: favoriteWithSignedUrl,
                 });
             }
         }
@@ -105,10 +126,22 @@ export async function POST(
                         relativeId: parentId,
                         productId,
                     },
+                    include: {
+                        product: true
+                    }
                 });
+
+                const favoriteWithSignedUrl = {
+                    ...favorite,
+                    product: {
+                        ...favorite.product,
+                        image: await signUrl(favorite.product.image),
+                    },
+                };
+
                 return Res.created({
                     message: "Added to favorites",
-                    data: favorite,
+                    data: favoriteWithSignedUrl,
                 });
             }
         }
@@ -190,9 +223,19 @@ export async function GET(
             orderBy: { createdAt: "desc" },
         });
 
+        const favoritesWithSignedUrls = await Promise.all(
+            favorites.map(async (favorite) => ({
+                ...favorite,
+                product: {
+                    ...favorite.product,
+                    image: await signUrl(favorite.product.image),
+                },
+            })),
+        );
+
         return Res.success({
             message: "Favorites fetched successfully",
-            data: favorites,
+            data: favoritesWithSignedUrls,
         });
     } catch (error) {
         console.error("Favorites GET error:", error);

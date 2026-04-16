@@ -2,6 +2,15 @@ import { Res } from "@/lib/general-response";
 import { prisma } from "@/lib/prisma";
 import { verifyAccessTokenFromRequest } from "@/lib/tokens";
 import { NextRequest } from "next/server";
+import { getPresignedUrl } from "@/lib/helpers/s3";
+
+async function signUrl(url: string) {
+    const key = url.includes("amazonaws.com")
+        ? url.split(".amazonaws.com/")[1]
+        : url;
+
+    return getPresignedUrl(key);
+}
 
 export async function POST(
     req: NextRequest,
@@ -79,9 +88,19 @@ export async function POST(
                         },
                     },
                 });
+
+                const favoriteWithSignedUrls = {
+                    ...favorite,
+                    music: {
+                        ...favorite.music,
+                        thumbnail: await signUrl(favorite.music.thumbnail),
+                        url: await signUrl(favorite.music.url),
+                    },
+                };
+
                 return Res.created({
                     message: "Added to favorites",
-                    data: favorite,
+                    data: favoriteWithSignedUrls,
                 });
             }
         }
@@ -139,9 +158,16 @@ export async function POST(
                     },
                 });
                 const flattenedFavorite = favorite.music;
+
+                const flattenedFavoriteWithSignedUrls = {
+                    ...flattenedFavorite,
+                    thumbnail: await signUrl(flattenedFavorite.thumbnail),
+                    url: await signUrl(flattenedFavorite.url),
+                };
+
                 return Res.created({
                     message: "Added to favorites",
-                    data: flattenedFavorite,
+                    data: flattenedFavoriteWithSignedUrls,
                 });
             }
         }
@@ -219,9 +245,17 @@ export async function GET(
             .map((fav) => fav.music)
             .filter((m) => m !== null);
 
+        const favoritesWithSignedUrls = await Promise.all(
+            flattenedFavorites.map(async (music) => ({
+                ...music,
+                thumbnail: await signUrl(music.thumbnail),
+                url: await signUrl(music.url),
+            })),
+        );
+
         return Res.success({
             message: "Favorites fetched successfully",
-            data: flattenedFavorites,
+            data: favoritesWithSignedUrls,
         });
     } catch (error) {
         console.error("Favorites GET error:", error);

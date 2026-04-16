@@ -8,121 +8,122 @@ datasource db {
 }
 
 model Admin {
-  id              String     @id @default(auto()) @map("_id") @db.ObjectId
-  name            String
-  email           String     @unique
-  password        String
-  categories      Category[]
-  subCategories   SubCategory[]
-  musicCategories MusicCategory[]
-  musicSubCategories  MuiscSubCategory[]
-  milestone       Milestone[]
+  id                 String             @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  email              String             @unique
+  password           String
+  categories         Category[]
+  subCategories      SubCategory[]
+  musicCategories    MusicCategory[]
+  musicSubCategories MuiscSubCategory[]
+  milestone          Milestone[]
   messages           Message[]
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  profilePicture     String?
 
   @@map("admins")
 }
 
 model Category {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  slug           String    @unique
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  admin          Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  adminId        String    @db.ObjectId
-  products       Product[]
-  subCategories  SubCategory[]
-  suppliers      Supplier[]
-  status         Status      @default(INACTIVE)
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  slug          String        @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  admin         Admin         @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  adminId       String        @db.ObjectId
+  products      Product[]
+  subCategories SubCategory[]
+  suppliers     Supplier[]
+  status        Status        @default(INACTIVE)
 
-  isDeleted      Boolean      @default(false)
-  deletedAt      DateTime?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
   @@map("categories")
 }
 
 model SubCategory {
-  id          String      @id @default(auto()) @map("_id") @db.ObjectId
-  name        String  
-  slug        String      @unique
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  admin       Admin       @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  adminId     String      @db.ObjectId
-  parent      Category    @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId    String      @db.ObjectId
-  products    Product[]
-  suppliers   Supplier[]
-  status      Status      @default(INACTIVE)
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  admin     Admin      @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  adminId   String     @db.ObjectId
+  parent    Category   @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId  String     @db.ObjectId
+  products  Product[]
+  suppliers Supplier[]
+  status    Status     @default(INACTIVE)
 
-  isDeleted   Boolean     @default(false)
-  deletedAt   DateTime?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
   @@map("sub_categories")
 }
 
 model MusicCategory {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  slug           String    @unique
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  admin          Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  adminId        String    @db.ObjectId
-  musics         Music[]
-  subCategories  MuiscSubCategory[]
-  status         Status @default(INACTIVE)
-  artists        Artist[]
+  id            String             @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  slug          String             @unique
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  admin         Admin              @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  adminId       String             @db.ObjectId
+  musics        Music[]
+  subCategories MuiscSubCategory[]
+  status        Status             @default(INACTIVE)
+  artists       Artist[]
 
-  isDeleted      Boolean      @default(false)
-  deletedAt      DateTime?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
   @@map("music_categories")
 }
 
 model MuiscSubCategory {
-  id          String           @id @default(auto()) @map("_id") @db.ObjectId
-  name        String       
-  slug        String           @unique
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  admin       Admin            @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  adminId     String           @db.ObjectId
-  parent      MusicCategory    @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId    String           @db.ObjectId
-  music       Music[]
-  status      Status           @default(INACTIVE)
-  artists     Artist[]
-  isDeleted   Boolean          @default(false)
-  deletedAt   DateTime?
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  slug      String        @unique
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  admin     Admin         @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  adminId   String        @db.ObjectId
+  parent    MusicCategory @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId  String        @db.ObjectId
+  music     Music[]
+  status    Status        @default(INACTIVE)
+  artists   Artist[]
+  isDeleted Boolean       @default(false)
+  deletedAt DateTime?
 
   @@map("music_sub_categories")
 }
 
 model Product {
-  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
   name          String
-  slug          String      @unique
+  slug          String            @unique
   image         String?
   costPrice     Float?
   salePrice     Float
   quantity      Int
   taxPercent    Float
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  category      Category    @relation(fields: [categoryId], references: [id])
-  categoryId    String      @db.ObjectId
-  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id])
-  subCategoryId String      @db.ObjectId
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  category      Category          @relation(fields: [categoryId], references: [id])
+  categoryId    String            @db.ObjectId
+  subCategory   SubCategory       @relation(fields: [subCategoryId], references: [id])
+  subCategoryId String            @db.ObjectId
   favorites     ProductFavorite[]
 
-  listedById    String?   @db.ObjectId
-  listedBy      Supplier?   @relation(fields: [listedById], references: [id], onDelete: Cascade)
+  listedById String?   @db.ObjectId
+  listedBy   Supplier? @relation(fields: [listedById], references: [id], onDelete: Cascade)
 
-  isDeleted     Boolean      @default(false)
-  deletedAt     DateTime?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
   orderProducts OrderItem[]
   cartItems     CartItem[]
@@ -131,35 +132,35 @@ model Product {
 }
 
 model Cart {
-  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  items       CartItem[]
+  items CartItem[]
 
-  parent      Parent?         @relation(fields: [parentId], references: [id])
-  parentId    String?         @db.ObjectId
+  parent   Parent? @relation(fields: [parentId], references: [id])
+  parentId String? @db.ObjectId
 
-  relative    ChildRelation?  @relation(fields: [relativeId], references: [id])
-  relativeId  String?         @db.ObjectId
+  relative   ChildRelation? @relation(fields: [relativeId], references: [id])
+  relativeId String?        @db.ObjectId
 
-  isDeleted  Boolean          @default(false)
-  deletedAt  DateTime?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("carts")
 }
 
 model CartItem {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  cart      Cart     @relation(fields: [cartId], references: [id])
-  cartId    String   @db.ObjectId
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String   @db.ObjectId
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  cartId    String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @db.ObjectId
   quantity  Int
   price     Float
 
-  isDeleted Boolean  @default(false)
+  isDeleted Boolean   @default(false)
   deletedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -170,37 +171,37 @@ model CartItem {
 }
 
 model Order {
-  id              String          @id @default(auto()) @map("_id") @db.ObjectId
-  trackingNumber  String          @unique
-  parent          Parent?         @relation(fields: [parentId], references: [id])
-  parentId        String?         @db.ObjectId
-  relative        ChildRelation?  @relation(fields: [relativeId], references: [id])
-  relativeId      String?         @db.ObjectId
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  trackingNumber  String         @unique
+  parent          Parent?        @relation(fields: [parentId], references: [id])
+  parentId        String?        @db.ObjectId
+  relative        ChildRelation? @relation(fields: [relativeId], references: [id])
+  relativeId      String?        @db.ObjectId
   shippingAddress String
   totalPrice      Float
-  orderStatus     OrderStatus     @default(PENDING)
+  orderStatus     OrderStatus    @default(PENDING)
   paymentStatus   PaymentStatus
   orderItems      OrderItem[]
 
-  isDeleted       Boolean         @default(false)
-  deletedAt       DateTime?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("orders")
 }
 
 model OrderItem {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
-  order     Order     @relation(fields: [orderId], references: [id])
-  orderId   String    @db.ObjectId
-  quantity  Int 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  product   Product   @relation(fields: [productId], references: [id])
-  productId String    @db.ObjectId
- 
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String   @db.ObjectId
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String   @db.ObjectId
+
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
 
@@ -220,103 +221,221 @@ model Parent {
   comments   Comment[]
   country    Country?
 
-  children           Child[]           @relation(fields: [childIds], references: [id])
-  childIds           String[]          @db.ObjectId
-  messages           Message[]
-  chats              Chat[]
-  chatParticipants   ChatParticipant[]
-  milestoneProgress  ChildMilestoneProgress[]
-  queries            Query[]
+  children          Child[]                  @relation(fields: [childIds], references: [id])
+  childIds          String[]                 @db.ObjectId
+  messages          Message[]
+  chats             Chat[]
+  chatParticipants  ChatParticipant[]
+  milestoneProgress ChildMilestoneProgress[]
+  queries           Query[]
 
-  folders          Folder[] @relation("ParentFolders") 
-  uploadedImages   Image[]  @relation("ParentImages")
+  folders          Folder[]          @relation("ParentFolders")
+  uploadedImages   Image[]           @relation("ParentImages")
   Folder           Folder[]
   activities       Activity[]
   feedSchedules    FeedSchedule[]
   babySleep        BabySleep[]
   productFavorites ProductFavorite[]
-  musicFavorites MusicFavorite[]
+  musicFavorites   MusicFavorite[]
   carts            Cart[]
   orders           Order[]
   purchasedMusic   PurchasedMusic[]
 
-  isDeleted          Boolean      @default(false)
-  deletedAt          DateTime?
+  profilePicture String?
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  appointments      Appointment[]      @relation("ParentAppointments")
 
   @@map("parents")
 }
 
 model Supplier {
-  id                 String       @id @default(auto()) @map("_id") @db.ObjectId
-  name               String
-  password           String
-  cnic               String
-  email              String       @unique
-  country            String
-  state              String
-  city               String
-  status             Status      @default(INACTIVE)
-  subscription       String?
-  category           Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId         String       @db.ObjectId
-  subCategory        SubCategory  @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
-  subCategoryId      String       @db.ObjectId
-  products           Product[]
-  messages           Message[]
-  
-  supplierOTP        SupplierOTP[]
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  password      String
+  cnic          String
+  email         String      @unique
+  country       String
+  state         String
+  city          String
+  status        Status      @default(INACTIVE)
+  subscription  String?
+  category      Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId    String      @db.ObjectId
+  subCategory   SubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  subCategoryId String      @db.ObjectId
+  products      Product[]
+  messages      Message[]
 
-  isDeleted          Boolean      @default(false)
-  deletedAt          DateTime?
-  
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  supplierOTP SupplierOTP[]
+
+  nationalId           String?
+  businessRegistration String?
+  taxId                String?
+  productCatalog       String?
+  insurance            String?
+
+  isVerified Boolean @default(false)
+  isPaid     Boolean @default(false)
+
+  isDeleted      Boolean   @default(false)
+  deletedAt      DateTime?
+  profilePicture String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  paidUntil DateTime?
 
   @@map("supplier")
 }
 
 model Artist {
-  id                 String       @id @default(auto()) @map("_id") @db.ObjectId
-  name               String
-  password           String
-  cnic               String
-  email              String       @unique
-  country            String
-  state              String
-  city               String
-  status             Status      @default(INACTIVE)
-  subscription       String?
-  category           MusicCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId         String       @db.ObjectId
-  subCategory        MuiscSubCategory  @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
-  subCategoryId      String       @db.ObjectId
-  music              Music[]
-  messages           Message[]
+  id            String           @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  password      String
+  cnic          String
+  email         String           @unique
+  country       String
+  state         String
+  city          String
+  status        Status           @default(INACTIVE)
+  subscription  String?
+  category      MusicCategory    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId    String           @db.ObjectId
+  subCategory   MuiscSubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+  subCategoryId String           @db.ObjectId
+  music         Music[]
+  messages      Message[]
 
-  artistOTP          ArtistOTP[]
+  artistOTP ArtistOTP[]
 
-  isDeleted          Boolean      @default(false)
-  deletedAt          DateTime?
-  
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  nationalId            String?
+  portfolio             String?
+  copyrightCertificates String?
+  exhibitionRecords     String?
+  bankDetails           String?
+
+  isVerified Boolean @default(false)
+  isPaid     Boolean @default(false)
+
+  isDeleted      Boolean   @default(false)
+  deletedAt      DateTime?
+  profilePicture String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  paidUntil DateTime?
 
   @@map("artist")
 }
 
-model Query {
-  id              String        @id @default(auto()) @map("_id") @db.ObjectId
-  name            String
-  email           String
-  subject         String
-  message         String
-  status          QueryStatus  @default(PENDING)
-  priority        Priority     @default(LOW)
-  parent          Parent       @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId        String       @db.ObjectId
+model Doctor {
+  id                String         @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  email             String         @unique
+  password          String
+  phone             String
+  city              String
+  state             String
+  zipCode           String?
+  specialty         String
+  licenseNumber     String
+  yearsOfExperience Int
+  consultationFee   Float
+  serviceMode       ServiceMode
+  clinic            Clinic[]
+  bio               String?
+  availability      Availability[]
+  profilePicture    String?
 
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  nationalId           String?
+  medicalLicense       String?
+  specialtyCertificate String?
+  malpracticeInsurance String?
+  deaRegistration      String?
+
+  isVerified           Boolean @default(false)
+  isPaid               Boolean @default(false)
+
+  paymentCollectionMethod PaymentCollectionMethod @default(SELF)
+  withdrawalFrequency     WithdrawalFrequency?
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  appointments Appointment[] @relation("DoctorAppointments")
+  chatParticipants ChatParticipant[] // Add this relationship
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  paidUntil DateTime?
+
+  @@map("doctors")
+}
+
+model Babysitter {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  email    String  @unique
+  password String
+  phone    String
+  city     String
+  state    String
+  zipCode  String?
+
+  // Professional info
+  experience     Int
+  ageGroups      String[] // e.g. ["0-2", "3-6", "7-12"]
+  languages      String[] // e.g. ["English", "Spanish"]
+  certifications String?
+  bio            String?
+
+  // Media
+  profilePictureUrl String?
+
+  // Documents (store file URLs/paths)
+  nationalIdUrl          String?
+  firstAidCertificateUrl String?
+  backgroundCheckUrl     String?
+  childcareDiplomaUrl    String?
+  referenceLettersUrl    String?
+
+  // Relations
+  availability Availability[]
+
+  // Status
+  isVerified Boolean @default(false)
+  isPaid     Boolean @default(false)
+
+  paymentCollectionMethod PaymentCollectionMethod @default(SELF)
+  withdrawalFrequency     WithdrawalFrequency?
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  appointments     Appointment[] @relation("BabysitterAppointments")
+  chatParticipants ChatParticipant[] // Add this relationship
+
+  // Timestamps
+  hourlyRate Float?
+  createdAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  paidUntil DateTime?
+
+  @@map("babysitters")
+}
+
+model Query {
+  id       String      @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  email    String
+  subject  String
+  message  String
+  status   QueryStatus @default(PENDING)
+  priority Priority    @default(LOW)
+  parent   Parent      @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId String      @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("query")
 }
@@ -340,200 +459,197 @@ model Query {
 // }
 
 model Activity {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  type            ActivityType
+  id   String       @id @default(auto()) @map("_id") @db.ObjectId
+  type ActivityType
 
   // Temperature tracking
-  temperature     BabyTemperature[]
-  babySleep       BabySleep[]
+  temperature BabyTemperature[]
+  babySleep   BabySleep[]
 
   // Sleep tracking
-  sleepTime       DateTime?
-  awakeTime       DateTime?
-  napDuration     Int?       // in minutes
+  sleepTime   DateTime?
+  awakeTime   DateTime?
+  napDuration Int? // in minutes
 
   // Feed tracking
-  feedType        FeedType?    // e.g. "milk", "formula", "water"
-  feedName        String?    // e.g. "milk", "formula", "water"
-  feedAmount      Float?     // e.g. 120 ml
-  feedTime        DateTime?  // actual feed time
+  feedType   FeedType? // e.g. "milk", "formula", "water"
+  feedName   String? // e.g. "milk", "formula", "water"
+  feedAmount Float? // e.g. 120 ml
+  feedTime   DateTime? // actual feed time
 
   // Relation
-  parent          Parent   @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId        String   @db.ObjectId
+  parent   Parent @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId String @db.ObjectId
 
-  child           Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
-  childId         String   @db.ObjectId
+  child   Child  @relation(fields: [childId], references: [id], onDelete: Cascade)
+  childId String @db.ObjectId
 
-  feedSlot       FeedSlot[]
+  feedSlot FeedSlot[]
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("activities")
 }
 
 model BabySleep {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  sleepType    SleepType
-  sleepTime    DateTime  // when baby sleeps
-  awakeTime    DateTime? // when baby wakes
-  duration     Int?      // in minutes, auto-calculated
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  sleepType SleepType
+  sleepTime DateTime // when baby sleeps
+  awakeTime DateTime? // when baby wakes
+  duration  Int? // in minutes, auto-calculated
 
-  activity     Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  activityId   String    @db.ObjectId
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityId String   @db.ObjectId
 
-  parent       Parent    @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId     String    @db.ObjectId
+  parent   Parent @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId String @db.ObjectId
 
-  child        Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
-  childId      String    @db.ObjectId
+  child   Child  @relation(fields: [childId], references: [id], onDelete: Cascade)
+  childId String @db.ObjectId
 
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("baby_sleep")
 }
 
 model BabyTemperature {
-  id              String      @id @default(auto()) @map("_id") @db.ObjectId
-  temperature     Float?
-  date            DateTime?
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  temperature Float?
+  date        DateTime?
 
-  acitivity       Activity    @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  activityId      String      @db.ObjectId
+  acitivity  Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityId String   @db.ObjectId
 }
 
 model FeedSchedule {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  title       String
-  date        DateTime
-  inUsed      Boolean  @default(false)
+  id     String   @id @default(auto()) @map("_id") @db.ObjectId
+  title  String
+  date   DateTime
+  inUsed Boolean  @default(false)
 
-  parent      Parent   @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId    String   @db.ObjectId
+  parent   Parent @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId String @db.ObjectId
 
-  child       Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
-  childId     String   @db.ObjectId
+  child   Child  @relation(fields: [childId], references: [id], onDelete: Cascade)
+  childId String @db.ObjectId
 
   // Feed plan
-  feedType    FeedType?    // "milk", "formula", "water"
+  feedType    FeedType? // "milk", "formula", "water"
   feedName    String?
-  amount      Float?     // ml
-  feedTime    DateTime?  // planned feed time
+  amount      Float? // ml
+  feedTime    DateTime? // planned feed time
   repeatDaily Boolean   @default(true) // repeats every day
 
-  feedSlots   FeedSlot[]
+  feedSlots FeedSlot[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("feed_schedules")
 }
 
 model FeedSlot {
-  id            String        @id @default(auto()) @map("_id") @db.ObjectId
-  feedSchedule  FeedSchedule  @relation(fields: [feedScheduleId], references: [id], onDelete: Cascade)
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  feedSchedule   FeedSchedule @relation(fields: [feedScheduleId], references: [id], onDelete: Cascade)
   feedScheduleId String       @db.ObjectId
 
-  feedTime      DateTime        // e.g., "08:00" (planned time)
-  feedType      FeedType        // "milk", "formula", "water"
-  feedName      String
-  amount        Float        // e.g., 120 ml
+  feedTime DateTime // e.g., "08:00" (planned time)
+  feedType FeedType // "milk", "formula", "water"
+  feedName String
+  amount   Float // e.g., 120 ml
 
   // Optional link to Activity once feed is taken
-  activity      Activity?     @relation(fields: [activityId], references: [id])
-  activityId    String?       @db.ObjectId
+  activity   Activity? @relation(fields: [activityId], references: [id])
+  activityId String?   @db.ObjectId
 
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("feed_slots")
 }
 
 model ProductFavorite {
-  id         String          @id @default(auto()) @map("_id") @db.ObjectId
-  parentId   String?         @db.ObjectId
-  relativeId String?         @db.ObjectId
-  productId  String?         @db.ObjectId
-  createdAt  DateTime        @default(now())
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  parentId   String?  @db.ObjectId
+  relativeId String?  @db.ObjectId
+  productId  String?  @db.ObjectId
+  createdAt  DateTime @default(now())
 
-  parent     Parent?         @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  relative   ChildRelation?  @relation(fields: [relativeId], references: [id], onDelete: Cascade)
-  product    Product?        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  parent   Parent?        @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  relative ChildRelation? @relation(fields: [relativeId], references: [id], onDelete: Cascade)
+  product  Product?       @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([parentId, productId])
   @@unique([relativeId, productId])
-
   @@map("product_favorites")
 }
 
 model MusicFavorite {
-  id         String          @id @default(auto()) @map("_id") @db.ObjectId
-  parentId   String?         @db.ObjectId
-  relativeId String?         @db.ObjectId
-  musicId    String?         @db.ObjectId
-  createdAt  DateTime        @default(now())
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  parentId   String?  @db.ObjectId
+  relativeId String?  @db.ObjectId
+  musicId    String?  @db.ObjectId
+  createdAt  DateTime @default(now())
 
-  parent     Parent?         @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  relative   ChildRelation?  @relation(fields: [relativeId], references: [id], onDelete: Cascade)
-  music      Music?          @relation(fields: [musicId], references: [id], onDelete: Cascade)
+  parent   Parent?        @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  relative ChildRelation? @relation(fields: [relativeId], references: [id], onDelete: Cascade)
+  music    Music?         @relation(fields: [musicId], references: [id], onDelete: Cascade)
 
   // prevent user from favoriting the same music/product twice
   @@unique([parentId, musicId])
   @@unique([relativeId, musicId])
-
   @@map("music_favorites")
 }
 
-
 model Music {
-  id               String            @id @default(auto()) @map("_id") @db.ObjectId
-  title            String
-  url              String
-  mimeType         String
-  size             Int
-  type             MusicType         @default(FREE)
-  price            Float?
-  thumbnail        String?
-    
-  uploadedById     String?           @db.ObjectId
-  uploadedBy       Artist?           @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  url       String
+  mimeType  String
+  size      Int
+  type      MusicType @default(FREE)
+  price     Float?
+  thumbnail String?
 
-  category         MusicCategory?    @relation(fields: [categoryId], references: [id])
-  categoryId       String?           @db.ObjectId
-  
-  subCategory      MuiscSubCategory  @relation(fields: [subCategoryId], references: [id])
-  subCategoryId    String            @db.ObjectId
-  
-  favorites        MusicFavorite[]
-  purchasedBy      PurchasedMusic[]
+  uploadedById String? @db.ObjectId
+  uploadedBy   Artist? @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
 
-  isDeleted        Boolean           @default(false)
-  deletedAt        DateTime?
+  category   MusicCategory? @relation(fields: [categoryId], references: [id])
+  categoryId String?        @db.ObjectId
 
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  subCategory   MuiscSubCategory @relation(fields: [subCategoryId], references: [id])
+  subCategoryId String           @db.ObjectId
+
+  favorites   MusicFavorite[]
+  purchasedBy PurchasedMusic[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("musics")
 }
 
 model PurchasedMusic {
-  id            String              @id @default(auto()) @map("_id") @db.ObjectId
-  parentId      String?             @db.ObjectId
-  relativeId    String?             @db.ObjectId
-  musicId       String              @db.ObjectId
-  purchasedAt   DateTime            @default(now())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  parentId    String?  @db.ObjectId
+  relativeId  String?  @db.ObjectId
+  musicId     String   @db.ObjectId
+  purchasedAt DateTime @default(now())
 
-  parent        Parent?             @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  relative      ChildRelation?      @relation(fields: [relativeId], references: [id], onDelete: Cascade)
-  music         Music               @relation(fields: [musicId], references: [id], onDelete: Cascade)
+  parent   Parent?        @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  relative ChildRelation? @relation(fields: [relativeId], references: [id], onDelete: Cascade)
+  music    Music          @relation(fields: [musicId], references: [id], onDelete: Cascade)
 
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  isDeleted  Boolean     @default(false)
-  deletedAt  DateTime?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
   @@unique([parentId, musicId])
   @@unique([relativeId, musicId])
@@ -541,24 +657,24 @@ model PurchasedMusic {
 }
 
 model Folder {
-  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
   name       String
-  type       FolderType  // "SHARED" | "PERSONAL"
-  parentId   String?     @db.ObjectId
-  parent     Folder?     @relation("Subfolders", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  subfolders Folder[]    @relation("Subfolders")
+  type       FolderType // "SHARED" | "PERSONAL"
+  parentId   String?    @db.ObjectId
+  parent     Folder?    @relation("Subfolders", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subfolders Folder[]   @relation("Subfolders")
 
-  ownerId    String?     @db.ObjectId
-  owner      Parent?     @relation("ParentFolders", fields: [ownerId], references: [id])
+  ownerId String? @db.ObjectId
+  owner   Parent? @relation("ParentFolders", fields: [ownerId], references: [id])
 
-  images     Image[]
+  images Image[]
 
-  isDeleted  Boolean     @default(false)
-  deletedAt  DateTime?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  Parent     Parent?     @relation(fields: [parentId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Parent    Parent?  @relation(fields: [parentId], references: [id])
 
   @@map("folders")
 }
@@ -569,22 +685,22 @@ enum FolderType {
 }
 
 model Image {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  id         String  @id @default(auto()) @map("_id") @db.ObjectId
   url        String
   name       String
-  folderId   String    @db.ObjectId
-  folder     Folder    @relation(fields: [folderId], references: [id])
-  uploadedBy String?   @db.ObjectId
-  uploader   Parent?   @relation("ParentImages", fields: [uploadedBy], references: [id])
+  folderId   String  @db.ObjectId
+  folder     Folder  @relation(fields: [folderId], references: [id])
+  uploadedBy String? @db.ObjectId
+  uploader   Parent? @relation("ParentImages", fields: [uploadedBy], references: [id])
 
-  isDeleted  Boolean     @default(false)
-  deletedAt  DateTime?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Chat {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
   title     String
   parent    Parent? @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   creatorId String? @db.ObjectId
@@ -598,22 +714,28 @@ model Chat {
 }
 
 model ChatParticipant {
-  id                  String          @id @default(auto()) @map("_id") @db.ObjectId
-  chat                Chat            @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  chatId              String          @db.ObjectId
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId String @db.ObjectId
 
-  parent              Parent?         @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId            String?         @db.ObjectId
+  parent   Parent? @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId String? @db.ObjectId
 
-  childRelation       ChildRelation?  @relation(fields: [childRelationId], references: [id], onDelete: Cascade)
-  childRelationId     String?         @db.ObjectId
+  childRelation   ChildRelation? @relation(fields: [childRelationId], references: [id], onDelete: Cascade)
+  childRelationId String?        @db.ObjectId
 
-  messages            ChatMessage[]
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
+  // Add doctor support for doctor-patient chats
+  doctor   Doctor? @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  doctorId String? @db.ObjectId
 
-  @@unique([chatId, parentId])
-  @@unique([chatId, childRelationId])
+  // Add babysitter support for babysitter-parent chats
+  babysitter   Babysitter? @relation(fields: [babysitterId], references: [id], onDelete: Cascade)
+  babysitterId String? @db.ObjectId
+
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
   @@map("chat_participants")
 }
 
@@ -672,23 +794,25 @@ model Child {
   height   Float
   weight   Float
 
-  relations                 ChildRelation[] @relation(fields: [relationIds], references: [id])
-  relationIds               String[] @db.ObjectId
-  growthSummaries           GrowthSummary[]
-  vaccinationProgress       VaccinationProgress[]
-  milestoneProgress         ChildMilestoneProgress[]
-  activities                Activity[]
-  feedSchedules             FeedSchedule[]
-  babySleep                 BabySleep[]
+  relations           ChildRelation[]          @relation(fields: [relationIds], references: [id])
+  relationIds         String[]                 @db.ObjectId
+  growthSummaries     GrowthSummary[]
+  vaccinationProgress VaccinationProgress[]
+  milestoneProgress   ChildMilestoneProgress[]
+  activities          Activity[]
+  feedSchedules       FeedSchedule[]
+  babySleep           BabySleep[]
 
-  isDeleted  Boolean     @default(false)
-  deletedAt  DateTime?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   parents   Parent[] @relation(fields: [parentIds], references: [id])
   parentIds String[] @db.ObjectId
+
+  appointments Appointment[]
 
   @@map("childs")
 }
@@ -708,43 +832,43 @@ model GrowthSummary {
 }
 
 model Vaccination {
-  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  id                 String             @id @default(auto()) @map("_id") @db.ObjectId
   name               String
   administrationSite AdministrationSite
   month              VaccinationMonth
   country            Country
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  progresses         VaccinationProgress[]
+  progresses VaccinationProgress[]
 
   @@map("vaccinations")
 }
 
 model VaccinationProgress {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  status       VaccinationStatus @default(PENDING)
-  date         DateTime?
-  time         String?
-  note         String?
-  image        String?
+  id     String            @id @default(auto()) @map("_id") @db.ObjectId
+  status VaccinationStatus @default(PENDING)
+  date   DateTime?
+  time   String?
+  note   String?
+  image  String?
 
-  vaccination  Vaccination @relation(fields: [vaccinationId], references: [id])
-  vaccinationId String    @db.ObjectId
+  vaccination   Vaccination @relation(fields: [vaccinationId], references: [id])
+  vaccinationId String      @db.ObjectId
 
-  child        Child      @relation(fields: [childId], references: [id])
-  childId      String     @db.ObjectId
+  child   Child  @relation(fields: [childId], references: [id])
+  childId String @db.ObjectId
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([vaccinationId, childId])
   @@map("vaccination_progresses")
 }
 
 model ChildRelation {
-  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   password    String
   email       String
@@ -752,23 +876,57 @@ model ChildRelation {
   dateOfDeath String?
   relation    Relation
 
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  child       Child[]         @relation(fields: [childId], references: [id])
-  childId     String[]        @db.ObjectId
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  child            Child[]           @relation(fields: [childId], references: [id])
+  childId          String[]          @db.ObjectId
   chatParticipants ChatParticipant[]
-  carts       Cart[]
-  productFavorites   ProductFavorite[]
+  carts            Cart[]
+  productFavorites ProductFavorite[]
   musicFavorites   MusicFavorite[]
-  orders      Order[]
+  orders           Order[]
   purchasedMusic   PurchasedMusic[]
-  messages           Message[]
-  relativeOTP    RelativeOTP[]
+  messages         Message[]
+  relativeOTP      RelativeOTP[]
 
-  isDeleted  Boolean     @default(false)
-  deletedAt  DateTime?
+  profilePicture String?
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
   @@map("child_relations")
+}
+
+model Clinic {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  doctorId String @db.ObjectId
+  doctor   Doctor @relation(fields: [doctorId], references: [id])
+
+  name    String
+  address String
+  city    String
+  state   String
+  zipCode String
+}
+
+model Availability {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  doctorId String? @db.ObjectId
+  doctor   Doctor? @relation(fields: [doctorId], references: [id])
+
+  day          String // "Mon"
+  startTime    String // "09:00"
+  endTime      String // "17:00"
+  babysitter   Babysitter? @relation(fields: [babysitterId], references: [id])
+  babysitterId String?     @db.ObjectId
+}
+
+enum ServiceMode {
+  CLINIC
+  HOME
+  BOTH
 }
 
 model ParentOTP {
@@ -796,7 +954,7 @@ model SupplierOTP {
   verified  Boolean  @default(false)
 
   supplier   Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
-  supplierId String @db.ObjectId
+  supplierId String   @db.ObjectId
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -830,7 +988,7 @@ model RelativeOTP {
   verified  Boolean  @default(false)
 
   relative   ChildRelation @relation(fields: [relativeId], references: [id], onDelete: Cascade)
-  relativeId String @db.ObjectId
+  relativeId String        @db.ObjectId
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -846,42 +1004,42 @@ model Message {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  adminId    String?  @db.ObjectId
-  parentId    String?  @db.ObjectId
-  supplierId  String?  @db.ObjectId
-  artistId    String?  @db.ObjectId
-  relativeId  String?  @db.ObjectId
 
-  admin      Admin?   @relation(fields: [adminId], references: [id])
-  parent      Parent?   @relation(fields: [parentId], references: [id])
-  supplier    Supplier? @relation(fields: [supplierId], references: [id])
-  artist      Artist?   @relation(fields: [artistId], references: [id])
-  relative      ChildRelation?   @relation(fields: [relativeId], references: [id])
+  adminId    String? @db.ObjectId
+  parentId   String? @db.ObjectId
+  supplierId String? @db.ObjectId
+  artistId   String? @db.ObjectId
+  relativeId String? @db.ObjectId
+
+  admin    Admin?         @relation(fields: [adminId], references: [id])
+  parent   Parent?        @relation(fields: [parentId], references: [id])
+  supplier Supplier?      @relation(fields: [supplierId], references: [id])
+  artist   Artist?        @relation(fields: [artistId], references: [id])
+  relative ChildRelation? @relation(fields: [relativeId], references: [id])
 
   @@map("messages")
 }
 
 model Milestone {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  title       String   // e.g., "Movement"
-  description String?  // optional details
-  month       Int?      // Month number (1, 2, 3 ...)
+  title       String // e.g., "Movement"
+  description String? // optional details
+  month       Int? // Month number (1, 2, 3 ...)
   imageUrl    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relation
   subMilestones SubMilestone[]
-  admin   Admin  @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  adminId String @db.ObjectId
+  admin         Admin          @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  adminId       String         @db.ObjectId
 
   @@map("milestones")
 }
 
 model SubMilestone {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  title       String   // e.g., "Move Arm"
+  title       String // e.g., "Move Arm"
   description String?
   imageUrl    String?
   createdAt   DateTime @default(now())
@@ -898,26 +1056,162 @@ model SubMilestone {
 }
 
 model ChildMilestoneProgress {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  achieved      Boolean  @default(false)
-  achievedAt    DateTime?
-  note          String?
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  achieved   Boolean   @default(false)
+  achievedAt DateTime?
+  note       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  child        Child       @relation(fields: [childId], references: [id], onDelete: Cascade)
-  childId      String      @db.ObjectId
+  child   Child  @relation(fields: [childId], references: [id], onDelete: Cascade)
+  childId String @db.ObjectId
 
-  parent       Parent      @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  parentId     String      @db.ObjectId
+  parent   Parent @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  parentId String @db.ObjectId
 
-  subMilestone SubMilestone @relation(fields: [subMilestoneId], references: [id], onDelete: Cascade)
-  subMilestoneId String     @db.ObjectId
+  subMilestone   SubMilestone @relation(fields: [subMilestoneId], references: [id], onDelete: Cascade)
+  subMilestoneId String       @db.ObjectId
 
   @@unique([childId, subMilestoneId]) // prevent duplicates
   @@map("child_milestone_progress")
+}
+
+model Reel {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Owner (supports Admin, Parent, Relative)
+  createdById   String       @db.ObjectId
+  createdByType ReelUserType
+
+  // Media
+  videoUrl     String // final usable video (after upload)
+  thumbnailUrl String?
+
+  // Basic info
+  caption  String?
+  duration Int? // seconds
+
+  // Upload / Processing lifecycle
+  status ReelStatus @default(UPLOADING)
+
+  // Basic counters
+  viewCount  Int @default(0)
+  shareCount Int @default(0)
+
+  // Visibility (keep simple)
+  visibility ReelVisibility @default(PUBLIC)
+
+  // Relations
+  likes    ReelLike[]
+  saves    ReelSave[]
+  comments ReelComment[]
+
+  // Soft delete
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdById, createdByType])
+  @@index([status])
+}
+
+model ReelLike {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  reel   Reel   @relation(fields: [reelId], references: [id], onDelete: Cascade)
+  reelId String @db.ObjectId
+
+  userId   String
+  userType ReelUserType
+
+  createdAt DateTime @default(now())
+
+  @@unique([reelId, userId])
+  @@map("reel_likes")
+}
+
+model ReelSave {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  reel   Reel   @relation(fields: [reelId], references: [id], onDelete: Cascade)
+  reelId String @db.ObjectId
+
+  userId   String
+  userType ReelUserType
+
+  createdAt DateTime @default(now())
+
+  @@unique([reelId, userId])
+  @@map("reel_saves")
+}
+
+model ReelComment {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  reel   Reel   @relation(fields: [reelId], references: [id], onDelete: Cascade)
+  reelId String @db.ObjectId
+
+  userId       String
+  userType     ReelUserType
+  authorName   String
+  authorAvatar String?
+  text         String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reel_comments")
+}
+
+model ReelUpload {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  createdById   String       @db.ObjectId
+  createdByType ReelUserType
+
+  fileName String
+  mimeType String
+  size     Int
+
+  uploadUrl String // signed URL
+  status    UploadStatus @default(INITIATED)
+
+  reelId String? @db.ObjectId
+
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ReelUserType {
+  ADMIN
+  PARENT
+  RELATIVE
+}
+
+enum ReelStatus {
+  UPLOADING
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum UploadStatus {
+  INITIATED
+  UPLOADING
+  COMPLETED
+  FAILED
+}
+
+enum ReelVisibility {
+  PUBLIC
+  PRIVATE
+  FAMILY_ONLY
 }
 
 enum FeedType {
@@ -965,7 +1259,6 @@ enum VaccinationStatus {
   TAKEN
   SKIPPED
 }
-
 
 enum VaccinationMonth {
   AT_BIRTH
@@ -1038,4 +1331,131 @@ enum PaymentStatus {
   EXPIRED // Payment session expired (e.g., timeout)
   AUTHORIZED // Funds authorized but not yet captured
   CHARGEBACK // Customer disputed the charge and won
+}
+
+enum PaymentCollectionMethod {
+  SELF
+  TINY_GIGGLE
+}
+
+enum WithdrawalFrequency {
+  WEEKLY
+  FIFTEEN_DAYS
+  MONTHLY
+}
+
+enum AppointmentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  COMPLETED
+}
+
+model Appointment {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Relations
+  parentId String @db.ObjectId
+  parent   Parent @relation("ParentAppointments", fields: [parentId], references: [id], onDelete: Cascade)
+
+  doctorId String? @db.ObjectId
+  doctor   Doctor? @relation("DoctorAppointments", fields: [doctorId], references: [id])
+
+  babysitterId String?     @db.ObjectId
+  babysitter   Babysitter? @relation("BabysitterAppointments", fields: [babysitterId], references: [id])
+
+  childId      String?     @db.ObjectId
+  child        Child?      @relation(fields: [childId], references: [id])
+
+  // Data
+  appointmentDate DateTime
+  consultationFee Float
+  paymentMethod   PaymentCollectionMethod
+  paymentStatus   PaymentStatus           @default(PENDING)
+  status          AppointmentStatus       @default(PENDING)
+  notes           String?
+
+  // Session Management
+  sessionStartedAt DateTime?
+  sessionEndedAt   DateTime?
+  reportUrl        String?
+  checkupReport    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("appointments")
+}
+
+model CommunityQuestion {
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  content      String
+  authorId     String            @db.ObjectId
+  authorType   CommunityUserType
+  authorName   String
+  authorAvatar String?
+  
+  answers      CommunityAnswer[]
+  likes        CommunityLike[]
+  
+  views        Int               @default(0)
+  isDeleted    Boolean           @default(false)
+  
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([authorId, authorType])
+  @@map("community_questions")
+}
+
+model CommunityAnswer {
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  content      String
+  questionId   String            @db.ObjectId
+  question     CommunityQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  authorId     String            @db.ObjectId
+  authorType   CommunityUserType
+  authorName   String
+  authorAvatar String?
+  
+  likes        CommunityLike[]
+  isAccepted   Boolean           @default(false)
+  isDeleted    Boolean           @default(false)
+  
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([authorId, authorType])
+  @@map("community_answers")
+}
+
+model CommunityLike {
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String            @db.ObjectId
+  userType     CommunityUserType
+  
+  questionId   String?           @db.ObjectId
+  question     CommunityQuestion? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  answerId     String?           @db.ObjectId
+  answer       CommunityAnswer?   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime          @default(now())
+
+  @@unique([userId, questionId])
+  @@unique([userId, answerId])
+  @@map("community_likes")
+}
+
+enum CommunityUserType {
+  ADMIN
+  PARENT
+  DOCTOR
+  BABYSITTER
+  ARTIST
+  SUPPLIER
+  RELATIVE
 }

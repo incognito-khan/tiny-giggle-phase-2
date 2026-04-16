@@ -1,6 +1,15 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Res } from "@/lib/general-response";
+import { getPresignedUrl } from "@/lib/helpers/s3";
+
+async function signUrl(url: string) {
+    const key = url.includes("amazonaws.com")
+        ? url.split(".amazonaws.com/")[1]
+        : url;
+
+    return getPresignedUrl(key);
+}
 
 export async function POST(
     req: NextRequest,
@@ -95,12 +104,20 @@ export async function POST(
                 },
             });
 
+            const cartItemWithSignedUrl = {
+                ...cartItem,
+                product: {
+                    ...cartItem.product,
+                    image: await signUrl(cartItem.product.image),
+                },
+            };
+
             return Res.ok({
                 message: existingCartItem
                     ? "Cart item updated successfully"
                     : "Product added to cart successfully",
                 data: {
-                    cartItem,
+                    cartItem: cartItemWithSignedUrl,
                     type: existingCartItem
                         ? 'update'
                         : 'add'
@@ -180,12 +197,20 @@ export async function POST(
                 },
             });
 
+            const cartItemWithSignedUrl = {
+                ...cartItem,
+                product: {
+                    ...cartItem.product,
+                    image: await signUrl(cartItem.product.image),
+                },
+            };
+
             return Res.ok({
                 message: existingCartItem
                     ? "Cart item updated successfully"
                     : "Product added to cart successfully",
                 data: {
-                    cartItem,
+                    cartItem: cartItemWithSignedUrl,
                     type: existingCartItem
                         ? 'update'
                         : 'add'
@@ -271,8 +296,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ pr
                     },
                 },
             });
+
+            const updatedCartItemWithSignedUrl = {
+                ...updatedCartItem,
+                product: {
+                    ...updatedCartItem.product,
+                    image: await signUrl(updatedCartItem.product.image),
+                },
+            };
+
             return Res.ok({
-                message: "Cart item quantity reduced", data: updatedCartItem
+                message: "Cart item quantity reduced", data: updatedCartItemWithSignedUrl
             });
         } else {
             await prisma.cartItem.delete({ where: { id: cartItem.id } });

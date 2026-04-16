@@ -46,8 +46,8 @@ export async function POST(
                     subMilestone: { connect: { id: subMilestoneId } },
                     parent: { connect: { id: parentId } },
                     achieved,
-                    achievedAt,
-                    note,
+                    achievedAt: achieved && achievedAt ? new Date(achievedAt) : null,
+                    note: achieved ? note : null,
                 },
             });
         }
