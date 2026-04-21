@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { 
   Dialog, 
   DialogContent, 
@@ -39,10 +39,14 @@ import {
 } from "@/components/ui/select.jsx";
 import { POST } from "@/lib/api";
 import TimeSlotPicker from "./time-slot-picker";
+import { getChildren } from "@/store/slices/childSlice";
 
 export default function BookingModal({ isOpen, onOpenChange, professional, type = "doctor" }) {
   const router = useRouter();
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
+  const children = useSelector((state) => state.child.children) || [];
+  
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState("");
   const [childId, setChildId] = useState("");
@@ -50,10 +54,14 @@ export default function BookingModal({ isOpen, onOpenChange, professional, type 
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); 
 
+  React.useEffect(() => {
+    if (isOpen && children.length === 0 && user?.id) {
+       dispatch(getChildren({ parentId: user.id }));
+    }
+  }, [isOpen, children.length, user?.id, dispatch]);
+
   const isTinyGiggle = (professional?.paymentCollectionMethod || professional?.paymentMethod) === "TINY_GIGGLE";
   const fee = type === "doctor" ? (professional?.consultationFee || 0) : (professional?.hourlyRate || 0);
-
-  const children = user?.childs || [];
 
   const handleBooking = async () => {
     if (!time) {

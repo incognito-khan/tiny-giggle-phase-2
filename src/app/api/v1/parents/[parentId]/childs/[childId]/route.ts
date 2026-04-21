@@ -2,6 +2,15 @@ import { Res } from "@/lib/general-response";
 import { prisma } from "@/lib/prisma";
 import { verifyAccessTokenFromRequest } from "@/lib/tokens";
 import { NextRequest } from "next/server";
+import { getPresignedUrl } from "@/lib/helpers/s3";
+
+async function signUrl(url: string) {
+  const key = url.includes("amazonaws.com")
+    ? url.split(".amazonaws.com/")[1]
+    : url;
+
+  return getPresignedUrl(key);
+}
 
 export async function GET(
   req: NextRequest,
@@ -16,6 +25,12 @@ export async function GET(
     if (!parentId || !childId) {
       return Res.badRequest({ message: "Parent or Child ID is required" });
     }
+
+    const isValidObjectId = (id: string) => /^[a-f\d]{24}$/i.test(id);
+    if (!isValidObjectId(childId) || !isValidObjectId(parentId)) {
+      return Res.badRequest({ message: "Invalid ID format" });
+    }
+
     const existingParent = await prisma.parent.findUnique({
       where: { id: parentId },
     });
@@ -28,6 +43,14 @@ export async function GET(
       if (!existingRelative) {
         return Res.notFound({ message: "Invalid Parent or Relative ID provided" });
       }
+    }
+
+    const childExists = await prisma.child.findUnique({
+      where: { id: childId },
+    });
+
+    if (!childExists) {
+      return Res.notFound({ message: "Child not found" });
     }
 
     const childDetail = await prisma.child.findUnique({
@@ -110,18 +133,66 @@ export async function GET(
 
     const response = {
       ...childDetail,
+      avatar: await signUrl(childDetail.avatar),
       currentAge: calculateAge(childDetail.birthday),
       bmi: calculateBMI(lastGrowth?.weight || 0, lastGrowth?.height || 0),
       bmiStatus: classifyBMI(
         calculateBMI(lastGrowth?.weight || 0, lastGrowth?.height || 0)
       ),
+      lastGrowth,
       lastGrowthDate: getDaysSinceLastGrowth(lastGrowth?.date || null),
     };
+    console.log(response, 'response')
     return Res.ok({
       message: "Child detail fetch successfully",
       data: response,
     });
   } catch (error) {
+    console.error(error);
+    return Res.serverError();
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ parentId: string; childId: string }> }
+) {
+  try {
+    const { success, message } = await verifyAccessTokenFromRequest(req);
+    if (!success) {
+      return Res.unauthorized({ message });
+    }
+
+    const { parentId, childId } = await params;
+    if (!parentId || !childId) {
+      return Res.badRequest({ message: "Parent or Child ID is required" });
+    }
+
+    const isValidObjectId = (id: string) => /^[a-f\d]{24}$/i.test(id);
+    if (!isValidObjectId(childId) || !isValidObjectId(parentId)) {
+      return Res.badRequest({ message: "Invalid ID format" });
+    }
+
+    const child = await prisma.child.findFirst({
+      where: {
+        id: childId,
+        parents: { some: { id: parentId } },
+        isDeleted: false,
+      },
+    });
+
+    if (!child) {
+      return Res.notFound({ message: "Child not found or already removed" });
+    }
+
+    await prisma.child.update({
+      where: { id: childId },
+      data: { isDeleted: true },
+    });
+
+    return Res.ok({ message: "Child removed successfully", data: { childId } });
+  } catch (error) {
+    console.error(error);
     return Res.serverError();
   }
 }

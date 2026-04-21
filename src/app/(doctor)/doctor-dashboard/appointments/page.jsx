@@ -14,7 +14,9 @@ import {
   MessageSquare,
   PlayCircle,
   StopCircle,
-  FileText
+  FileText,
+  Pill,
+  ClipboardList,
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,6 +34,7 @@ import {
 } from "@/components/ui/dialog.jsx";
 import { Input } from "@/components/ui/input.jsx";
 import { Label } from "@/components/ui/label.jsx";
+import { Textarea } from "@/components/ui/textarea.jsx";
 
 export default function DoctorAppointmentsPage() {
   const [appointments, setAppointments] = useState([]);
@@ -41,7 +44,12 @@ export default function DoctorAppointmentsPage() {
   // Modal states
   const [selectedApp, setSelectedApp] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-  const [reportUrl, setReportUrl] = useState("");
+  const [reportData, setReportData] = useState({
+    diagnosis: "",
+    prescription: "",
+    extraNotes: "",
+    reportUrl: ""
+  });
   const [submitting, setSubmitting] = useState(false);
 
   const fetchAppointments = async () => {
@@ -73,6 +81,13 @@ export default function DoctorAppointmentsPage() {
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update status");
     }
+  };
+
+  const isGracePeriodOver = (appTime) => {
+    const appointmentTime = new Date(appTime);
+    const gracePeriodMinutes = 1; // Temporarily reduced to 1 minute for testing
+    const gracePeriodTime = new Date(appointmentTime.getTime() + gracePeriodMinutes * 60000);
+    return new Date() > gracePeriodTime;
   };
 
   const filteredAppointments = appointments.filter(app => {
@@ -137,23 +152,32 @@ export default function DoctorAppointmentsPage() {
 
          <div className="flex items-center gap-2">
             {app.status === "PENDING" && (
-              <>
-                <Button 
-                  onClick={() => updateStatus(app.id, "ACCEPTED")}
-                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl h-11 px-6 font-bold shadow-lg shadow-purple-200"
-                >
-                  <PlayCircle className="w-4 h-4 mr-2" />
-                  Accept & Start
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => updateStatus(app.id, "REJECTED")}
-                  className="border-slate-100 hover:bg-rose-50 hover:text-rose-600 rounded-xl h-11 px-6 font-bold"
-                >
-                  <XCircle className="w-4 h-4 mr-2" />
-                  Reject
-                </Button>
-              </>
+              app.paymentMethod === "TINY_GIGGLE" ? (
+                <div className="flex flex-col items-end">
+                   <Badge className="bg-indigo-50 text-indigo-600 border-indigo-100 px-4 py-2 rounded-xl mb-1 font-bold text-[10px]">
+                     TINY GIGGLE VERIFICATION
+                   </Badge>
+                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Waiting for automated payment verification</p>
+                </div>
+              ) : (
+                <>
+                  <Button 
+                    onClick={() => updateStatus(app.id, "ACCEPTED")}
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-xl h-11 px-6 font-bold shadow-lg shadow-purple-200"
+                  >
+                    <PlayCircle className="w-4 h-4 mr-2" />
+                    Accept & Start
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => updateStatus(app.id, "REJECTED")}
+                    className="border-slate-100 hover:bg-rose-50 hover:text-rose-600 rounded-xl h-11 px-6 font-bold"
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Reject
+                  </Button>
+                </>
+              )
             )}
 
             {app.status === "ACCEPTED" && (
@@ -172,13 +196,23 @@ export default function DoctorAppointmentsPage() {
                     <StopCircle className="w-4 h-4 mr-2" />
                     Complete & Share Report
                  </Button>
+                 {isGracePeriodOver(app.appointmentDate) && (
+                    <Button 
+                      variant="outline"
+                      onClick={() => updateStatus(app.id, "NOT_ATTENDED")}
+                      className="border-rose-100 hover:bg-rose-50 hover:text-rose-600 rounded-xl h-11 px-6 font-bold text-xs"
+                    >
+                      <XCircle className="w-3 h-3 mr-2" />
+                      Parent No Show
+                    </Button>
+                  )}
               </>
             )}
 
-            {app.status === "COMPLETED" && (
+            {app.status === "COMPLETED" && (app.reportUrl || app.checkupReport || app.diagnosis) && (
               <Button variant="outline" className="rounded-xl border-slate-100 h-11 font-bold text-slate-500">
                  <FileText className="w-4 h-4 mr-2" />
-                 View Report
+                 View {app.diagnosis ? "Consultation" : "Report"}
               </Button>
             )}
          </div>
@@ -241,37 +275,74 @@ export default function DoctorAppointmentsPage() {
 
       {/* Report Upload Modal */}
       <Dialog open={isReportModalOpen} onOpenChange={setIsReportModalOpen}>
-        <DialogContent className="sm:max-w-[450px] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-[600px] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden">
           <div className="bg-slate-900 p-8 text-white relative">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -z-0 translate-x-1/2 -translate-y-1/2" />
              <DialogHeader>
-                <DialogTitle className="text-2xl font-black">Share Checkup Report</DialogTitle>
-                <DialogDescription className="text-slate-400 font-medium">
-                   Upload the medical report to complete the session with {selectedApp?.parent?.name}
+                <DialogTitle className="text-3xl font-black tracking-tight">Consultation Report</DialogTitle>
+                <DialogDescription className="text-slate-400 font-medium text-lg">
+                   Summarize your session with {selectedApp?.parent?.name}
                 </DialogDescription>
              </DialogHeader>
           </div>
-          <div className="p-8 space-y-6 bg-white">
+          <div className="p-8 space-y-6 bg-white overflow-y-auto max-h-[60vh]">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <ClipboardList className="w-3 h-3 text-purple-500" /> Diagnosis
+                    </Label>
+                    <Textarea 
+                        placeholder="What is the diagnosis?"
+                        value={reportData.diagnosis}
+                        onChange={(e) => setReportData({...reportData, diagnosis: e.target.value})}
+                        className="rounded-2xl border-slate-100 font-bold min-h-[100px] focus:ring-purple-100"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                        <Pill className="w-3 h-3 text-rose-500" /> Prescription
+                    </Label>
+                    <Textarea 
+                        placeholder="Medicines or next steps..."
+                        value={reportData.prescription}
+                        onChange={(e) => setReportData({...reportData, prescription: e.target.value})}
+                        className="rounded-2xl border-slate-100 font-bold min-h-[100px] focus:ring-rose-100"
+                    />
+                </div>
+             </div>
+
              <div className="space-y-2">
-                <Label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Report URL (or Link)</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                    <FileText className="w-3 h-3 text-blue-500" /> Additional Notes
+                </Label>
+                <Textarea 
+                    placeholder="General advice, follow-up instructions..."
+                    value={reportData.extraNotes}
+                    onChange={(e) => setReportData({...reportData, extraNotes: e.target.value})}
+                    className="rounded-2xl border-slate-100 font-bold min-h-[120px]"
+                />
+             </div>
+
+             <div className="pt-4 border-t border-slate-50 space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400">External Report URL (Optional)</Label>
                 <div className="relative">
                    <FileUp className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                    <Input 
-                    placeholder="Enter report URL or cloud storage link..."
-                    value={reportUrl}
-                    onChange={(e) => setReportUrl(e.target.value)}
+                    placeholder="Link to file or cloud document..."
+                    value={reportData.reportUrl}
+                    onChange={(e) => setReportData({...reportData, reportUrl: e.target.value})}
                     className="h-12 rounded-2xl border-slate-100 pl-10 font-bold"
                    />
                 </div>
-                <p className="text-[10px] text-slate-400 font-medium italic mt-1 pl-1">Note: This will end the session and notify the parent.</p>
              </div>
           </div>
-          <DialogFooter className="p-8 pt-0 bg-white">
+          <DialogFooter className="p-8 pt-4 bg-white border-t border-slate-50">
              <Button 
-              onClick={() => updateStatus(selectedApp.id, "COMPLETED", { reportUrl })}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-2xl h-14 font-black shadow-lg shadow-purple-200"
-              disabled={!reportUrl}
+              onClick={() => updateStatus(selectedApp.id, "COMPLETED", reportData)}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-2xl h-14 font-black shadow-lg shadow-purple-200 transition-all active:scale-[0.98]"
+              disabled={!reportData.diagnosis && !reportData.prescription && !reportData.extraNotes && !reportData.reportUrl}
              >
-                Complete Session & Send Report
+                {submitting ? <Loader2 className="w-6 h-6 animate-spin" /> : "Complete Session & Notify Parent"}
              </Button>
           </DialogFooter>
         </DialogContent>

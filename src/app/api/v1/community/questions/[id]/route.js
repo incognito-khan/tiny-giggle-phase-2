@@ -98,3 +98,36 @@ export async function GET(req, { params }) {
     return Res.serverError();
   }
 }
+
+export async function DELETE(req, { params }) {
+  try {
+    const auth = await verifyAccessTokenFromRequest(req);
+    if (!auth.success) return Res.unauthorized();
+
+    const { id } = await params;
+    const userId = auth.data.id;
+
+    // Check if question exists and belongs to the user
+    const question = await prisma.communityQuestion.findUnique({
+      where: { id }
+    });
+
+    if (!question) {
+      return Res.notFound({ message: "Question not found" });
+    }
+
+    if (question.authorId !== userId && auth.data.role !== 'admin') {
+      return Res.forbidden({ message: "You are not authorized to delete this question" });
+    }
+
+    // Physical delete will cascade to answers and likes
+    await prisma.communityQuestion.delete({
+      where: { id }
+    });
+
+    return Res.ok({ message: "Question deleted successfully" });
+  } catch (error) {
+    console.error("Community question DELETE error:", error);
+    return Res.serverError();
+  }
+}

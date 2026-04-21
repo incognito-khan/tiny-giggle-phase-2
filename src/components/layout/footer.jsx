@@ -1,15 +1,32 @@
 "use client";
 
-import { Phone, Facebook, Linkedin, Mail, Eye, Plus } from "lucide-react";
+import {
+  Phone,
+  Facebook,
+  Linkedin,
+  Mail,
+  Eye,
+  Plus,
+  Instagram,
+  Youtube,
+} from "lucide-react";
 
 export default function Footer() {
+  // const instagramPhotos = [
+  //   "	https://html.vecurosoft.com/toddly/demo/assets/img/feedback/feedback-image-1-1.jpg",
+  //   "	https://html.vecurosoft.com/toddly/demo/assets/img/gallery/gallery-h1-1-1.jpg",
+  //   "	https://html.vecurosoft.com/toddly/demo/assets/img/gallery/gallery-h1-1-1.jpg",
+  //   "	https://html.vecurosoft.com/toddly/demo/assets/img/gallery/gallery-h1-1-3.jpg",
+  //   "	https://html.vecurosoft.com/toddly/demo/assets/img/feedback/feedback-image-1-1.jpg",
+  //   "	https://html.vecurosoft.com/toddly/demo/assets/img/gallery/gallery-h1-1-4.jpg",
+  // ];
   const instagramPhotos = [
-    "	https://html.vecurosoft.com/toddly/demo/assets/img/feedback/feedback-image-1-1.jpg",
-    "	https://html.vecurosoft.com/toddly/demo/assets/img/gallery/gallery-h1-1-1.jpg",
-    "	https://html.vecurosoft.com/toddly/demo/assets/img/gallery/gallery-h1-1-1.jpg",
-    "	https://html.vecurosoft.com/toddly/demo/assets/img/gallery/gallery-h1-1-3.jpg",
-    "	https://html.vecurosoft.com/toddly/demo/assets/img/feedback/feedback-image-1-1.jpg",
-    "	https://html.vecurosoft.com/toddly/demo/assets/img/gallery/gallery-h1-1-4.jpg",
+    "/footer/1.png",
+    "/footer/2.png",
+    "/footer/3.png",
+    "/footer/4.png",
+    "/footer/5.png",
+    "/footer/6.png",
   ];
 
   const exploreLinks = [
@@ -130,14 +147,24 @@ export default function Footer() {
               <div>
                 <p className="text-gray-400 mb-3">Follow Us :</p>
                 <div className="flex gap-3">
+                  <a
+                    href="https://www.facebook.com/share/1DvrnHfAYc"
+                    target="_blank"
+                  >
+                    <div className="w-10 h-10 bg-gray-700 hover:bg-brand rounded-full flex items-center justify-center cursor-pointer transition-colors duration-300">
+                      <Facebook className="w-5 h-5 text-white" />
+                    </div>
+                  </a>
+                  <a
+                    href="https://www.instagram.com/tinyg_iggle?igsh=MXRyZzJidmQxNjVkMA=="
+                    target="_blank"
+                  >
+                    <div className="w-10 h-10 bg-gray-700 hover:bg-brand rounded-full flex items-center justify-center cursor-pointer transition-colors duration-300">
+                      <Instagram className="w-5 h-5 text-white" />
+                    </div>
+                  </a>
                   <div className="w-10 h-10 bg-gray-700 hover:bg-brand rounded-full flex items-center justify-center cursor-pointer transition-colors duration-300">
-                    <Facebook className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="w-10 h-10 bg-gray-700 hover:bg-brand rounded-full flex items-center justify-center cursor-pointer transition-colors duration-300">
-                    <Linkedin className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="w-10 h-10 bg-gray-700 hover:bg-brand rounded-full flex items-center justify-center cursor-pointer transition-colors duration-300">
-                    <Mail className="w-5 h-5 text-white" />
+                    <Youtube className="w-5 h-5 text-white" />
                   </div>
                 </div>
               </div>

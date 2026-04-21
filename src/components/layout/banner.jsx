@@ -1,22 +1,22 @@
-"use client"
-import '@/app/(app)/globals.css'
-import "swiper/css"
-import "swiper/css/navigation"
-import "swiper/css/pagination"
-import "swiper/css/effect-fade"
+"use client";
+import "@/app/(app)/globals.css";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/effect-fade";
 import { MdDoubleArrow } from "react-icons/md";
-import { useRef } from 'react';
-import { useScroll, useTransform, motion } from 'framer-motion';
+import { useRef } from "react";
+import { useScroll, useTransform, motion } from "framer-motion";
 
 export default function Banner({ name }) {
   const container = useRef(null);
   const { scrollYProgress } = useScroll({
     target: container,
-    offset: ['start center', 'end center']
+    offset: ["start center", "end center"],
   });
 
   // Map scroll progress to background-position-y from 0% to 50%
-  const posY = useTransform(scrollYProgress, [0, 1], ['70%', '0%']);
+  const posY = useTransform(scrollYProgress, [0, 1], ["70%", "0%"]);
 
   return (
     <motion.div ref={container} className="relative h-[500px] overflow-hidden">
@@ -24,17 +24,19 @@ export default function Banner({ name }) {
         <motion.div
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url(https://html.vecurosoft.com/toddly/demo/assets/img/hero/banner-1-1.jpg)`,
-            backgroundPositionY: posY,
+            // backgroundImage: `url(https://html.vecurosoft.com/toddly/demo/assets/img/hero/banner-1-1.jpg)`,
+            backgroundImage: `url(/banner/banner.jpeg)`,
+            backgroundPositionY: "center",
+            backgroundPosition: "cover",
           }}
         >
           <div className="absolute inset-0 bg-black/20" />
-          <div className="absolute inset-0 flex flex-col items-center justify-center" >
-            <h1 className='text-4xl font-bold mb-1 text-white'>{name}</h1>
-            <p className='text-brand font-semibold flex gap-1 items-center text-md'>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <h1 className="text-4xl font-bold mb-1 text-white">{name}</h1>
+            <p className="text-brand font-semibold flex gap-1 items-center text-md">
               Home
               <MdDoubleArrow />
-              <span className='text-white'>{name}</span>
+              <span className="text-white">{name}</span>
             </p>
           </div>
         </motion.div>
@@ -55,5 +57,5 @@ export default function Banner({ name }) {
         </svg>
       </div>
     </motion.div>
-  )
+  );
 }

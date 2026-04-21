@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAccessToken } from "@/lib/tokens";
+import { signS3Url } from "@/lib/helpers/s3";
 
 /**
  * GET /api/v1/patients
@@ -47,9 +48,7 @@ export async function GET(request) {
       }
     });
 
-    console.log(`Found ${appointments.length} appointments for doctor ${doctorId}`);
-
-    // If no appointments found, let's try without status filter to see all appointments
+    // ... (logic to handle no appointments) ...
     if (!appointments || appointments.length === 0) {
       const allAppointments = await prisma.appointment.findMany({
         where: { doctorId: doctorId },
@@ -61,46 +60,43 @@ export async function GET(request) {
           }
         }
       });
-
-      console.log(`Total appointments for doctor ${doctorId}: ${allAppointments.length}`);
-      console.log("Appointment statuses:", allAppointments.map(a => a.status));
-
-      // For now, let's use all appointments regardless of status
       appointments = allAppointments;
     }
 
     // Transform the data to match frontend expectations
-    const patientsMap = new Map(); // Use Map to avoid duplicates
+    const patients = [];
 
-    appointments.forEach((appointment) => {
-      console.log(`Appointment ${appointment.id}: parent=${appointment.parentId}, children=${appointment.parent?.children?.length || 0}`);
-
+    for (const appointment of appointments) {
       if (appointment.parent?.children) {
-        appointment.parent.children.forEach((child) => {
-          if (!patientsMap.has(appointment.id)) {
-            patientsMap.set(appointment.id, {
-              id: child.id,
-              firstName: child.name.split(" ")[0] || "",
-              lastName: child.name.split(" ").slice(1).join(" ") || "",
-              name: child.name,
-              email: appointment.parent.email || "",
-              phone: appointment.parent.phone || "",
-              profilePicture: child.avatar || `https://i.pravatar.cc/150?u=${child.id}`,
-              status: appointment.status,
-              lastVisit: appointment.appointmentDate ? new Date(appointment.appointmentDate).toISOString() : null,
-              medicalConditions: [], // Child model doesn't have medical conditions
-              chatId: null, // Will be set if chat exists
-              hasChat: false, // Will be checked below
-              appointmentId: appointment.id,
-              appointmentStatus: appointment.status
-            });
-          }
-        });
-      }
-    });
+        for (const child of appointment.parent.children) {
+          // Sign report URL if exists
+          const signedReportUrl = appointment.reportUrl ? await signS3Url(appointment.reportUrl) : null;
 
-    const patients = Array.from(patientsMap.values());
-    console.log(`Returning ${patients.length} patients`);
+          patients.push({
+            id: child.id,
+            firstName: child.name.split(" ")[0] || "",
+            lastName: child.name.split(" ").slice(1).join(" ") || "",
+            name: child.name,
+            email: appointment.parent.email || "",
+            phone: appointment.parent.phone || "",
+            profilePicture: child.avatar ? await signS3Url(child.avatar) : `https://i.pravatar.cc/150?u=${child.id}`,
+            status: appointment.status,
+            lastVisit: appointment.appointmentDate ? new Date(appointment.appointmentDate).toISOString() : null,
+            medicalConditions: [],
+            chatId: null,
+            hasChat: false,
+            appointmentId: appointment.id,
+            appointmentStatus: appointment.status,
+            // Report fields
+            reportUrl: signedReportUrl,
+            diagnosis: appointment.diagnosis,
+            prescription: appointment.prescription,
+            extraNotes: appointment.extraNotes,
+            checkupReport: appointment.checkupReport,
+          });
+        }
+      }
+    }
 
     // Check for existing chats for each patient
     for (const patient of patients) {

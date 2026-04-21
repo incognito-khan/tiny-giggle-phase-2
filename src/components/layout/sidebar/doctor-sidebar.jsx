@@ -40,7 +40,11 @@ const sidebarLinks = [
   // { name: "Medical Records", href: "/doctor-dashboard/records", icon: FileText },
   { name: "Messages", href: "/chat", icon: MessageSquare },
   // { name: "Health Analytics", href: "/doctor-dashboard/analytics", icon: Activity },
-  { name: "Community", href: "/community", icon: MessageCircle },
+  {
+    name: "Community",
+    href: "/doctor-dashboard/community",
+    icon: MessageCircle,
+  },
 ];
 
 const secondaryLinks = [

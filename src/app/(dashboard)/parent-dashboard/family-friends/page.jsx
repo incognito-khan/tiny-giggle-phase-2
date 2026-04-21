@@ -98,6 +98,10 @@ export default function FamilyFriendsPage() {
 
   const handleCreateInvite = async () => {
     console.log("Creating invite:", newInvite);
+    if (!childId?.length) {
+      toast.error("Please select a child first");
+      return;
+    }
     await dispatch(
       createRelation({
         setLoading,

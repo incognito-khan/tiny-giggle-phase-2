@@ -2,18 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Res } from "@/lib/general-response";
 import { verifyAccessTokenFromRequest } from "@/lib/tokens";
-import { getPresignedUrl } from "@/lib/helpers/s3";
-
-async function signUrl(picture: string | null | undefined) {
-  if (!picture || !picture.startsWith("http")) return picture;
-  try {
-    const url = new URL(picture);
-    const key = url.pathname.startsWith("/") ? url.pathname.slice(1) : url.pathname;
-    return await getPresignedUrl(key);
-  } catch (err) {
-    return picture;
-  }
-}
+import { getPresignedUrl, signS3Url } from "@/lib/helpers/s3";
 
 // GET /api/v1/appointments
 // List appointments for the current user
@@ -50,17 +39,23 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' }
     });
 
-    // Sign profile pictures
+    // Sign profile pictures and report URLs
     const processedAppointments = await Promise.all(appointments.map(async (app) => {
       const processed = { ...app };
+      
+      // Sign medical report if exists
+      if (processed.reportUrl) {
+        processed.reportUrl = await signS3Url(processed.reportUrl);
+      }
+
       if (processed.doctor) {
-        processed.doctor.profilePicture = await signUrl(processed.doctor.profilePicture);
+        processed.doctor.profilePicture = await signS3Url(processed.doctor.profilePicture);
       }
       if (processed.babysitter) {
-        processed.babysitter.profilePictureUrl = await signUrl(processed.babysitter.profilePictureUrl);
+        processed.babysitter.profilePictureUrl = await signS3Url(processed.babysitter.profilePictureUrl);
       }
       if (processed.parent) {
-        processed.parent.profilePicture = await signUrl(processed.parent.profilePicture);
+        processed.parent.profilePicture = await signS3Url(processed.parent.profilePicture);
       }
       return processed;
     }));

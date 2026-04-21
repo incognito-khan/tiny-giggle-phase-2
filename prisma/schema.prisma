@@ -1350,6 +1350,7 @@ enum AppointmentStatus {
   REJECTED
   CANCELLED
   COMPLETED
+  NOT_ATTENDED
 }
 
 model Appointment {
@@ -1381,6 +1382,10 @@ model Appointment {
   sessionEndedAt   DateTime?
   reportUrl        String?
   checkupReport    String?
+  diagnosis        String?
+  prescription     String?
+  extraNotes       String?
+  paymentReference String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1445,8 +1450,7 @@ model CommunityLike {
 
   createdAt    DateTime          @default(now())
 
-  @@unique([userId, questionId])
-  @@unique([userId, answerId])
+  @@unique([userId, questionId, answerId])
   @@map("community_likes")
 }
 

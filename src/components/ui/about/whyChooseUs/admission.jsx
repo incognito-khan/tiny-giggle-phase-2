@@ -63,7 +63,8 @@ export default function AdmissionSection() {
           {/* Image placeholder */}
           <img
             className="w-full bg-gray-200"
-            src="https://html.vecurosoft.com/toddly/demo/assets/img/feedback/feedback-image-h2-1.jpg"
+            // src="https://html.vecurosoft.com/toddly/demo/assets/img/feedback/feedback-image-h2-1.jpg"
+            src="/professionals/questions.jpeg"
           />
         </div>
 

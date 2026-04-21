@@ -57,14 +57,14 @@ import {
 import Loading from "@/components/loading";
 import ParentHeader from "@/components/layout/header/parent-header";
 import { format } from "date-fns";
-import VaccinationCard from '@/components/vaccination/card';
+import VaccinationCard from "@/components/vaccination/card";
 import { uploadImage } from "@/store/slices/mediaSlice";
 
 export default function VaccinationsPage() {
   const parent = useSelector((state) => state.auth.user);
   const parentId = parent.id;
   const childId = useSelector((state) => state.child.childId);
-  console.log(childId, 'childId')
+  console.log(childId, "childId");
   const vaccinations = useSelector((state) => state.vaccination.vaccinations);
   console.log(vaccinations, "vaccinations");
   const [showAddVaccination, setShowAddVaccination] = useState(false);
@@ -80,7 +80,7 @@ export default function VaccinationsPage() {
     status: "",
     note: "",
     date: "",
-    time: ""
+    time: "",
   });
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -131,7 +131,7 @@ export default function VaccinationsPage() {
         parentId,
         childId: childId[0],
         formData: newVaccination,
-      })
+      }),
     );
     gettingAllVaccination();
     setShowAddVaccination(false);
@@ -142,7 +142,9 @@ export default function VaccinationsPage() {
   };
 
   const gettingAllVaccination = () => {
-    dispatch(getAllChildVaccinations({ parentId, childId: childId[0], setLoading }));
+    dispatch(
+      getAllChildVaccinations({ parentId, childId: childId[0], setLoading }),
+    );
   };
 
   useEffect(() => {
@@ -232,7 +234,7 @@ export default function VaccinationsPage() {
     setStatusForm({ ...statusForm, status: status });
     setVaccinationId(id);
     setIsSubmitVaccinationOpen(true);
-  }
+  };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -247,11 +249,21 @@ export default function VaccinationsPage() {
   const handleChangeVaccinationStatus = async (e) => {
     e.preventDefault();
     if (file) {
-      const image = await dispatch(uploadImage({ setLoading, parentId: parent?.id, file })).unwrap();
-      statusForm.image = image
+      const image = await dispatch(
+        uploadImage({ setLoading, parentId: parent?.id, file }),
+      ).unwrap();
+      statusForm.image = image;
     }
 
-    dispatch(changeChildVaccinationStatus({ setLoading, parentId: parent?.id, childId, body: statusForm, vaccinationId }))
+    dispatch(
+      changeChildVaccinationStatus({
+        setLoading,
+        parentId: parent?.id,
+        childId,
+        body: statusForm,
+        vaccinationId,
+      }),
+    );
     setIsSubmitVaccinationOpen(false);
     setStatusForm({
       status: "",
@@ -261,7 +273,7 @@ export default function VaccinationsPage() {
     });
     setPreview(null);
     setFile(null);
-  }
+  };
 
   return (
     <div className="min-h-screen w-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
@@ -291,27 +303,42 @@ export default function VaccinationsPage() {
             </div>
 
             {/* Vaccination Types */}
-            <Card className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-3xl">
-              <CardHeader>
-                <div className="flex items-center justify-between mt-2">
-                  <CardTitle className="text-gray-800">
-                    Available Vaccinations
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <VaccinationCard vaccinations={vaccinations} handleShowVacStatus={handleShowVacStatus} parent={true} />
-                </div>
-              </CardContent>
-            </Card>
+            {childId?.length > 0 ? (
+              <Card className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-3xl">
+                <CardHeader>
+                  <div className="flex items-center justify-between mt-2">
+                    <CardTitle className="text-gray-800">
+                      Available Vaccinations
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <VaccinationCard
+                      vaccinations={vaccinations}
+                      handleShowVacStatus={handleShowVacStatus}
+                      parent={true}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="text-center py-16">
+                <h2>
+                  No Vaccination Found.
+                  {childId?.length ? "" : " Please select a child first"}
+                </h2>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <Dialog open={isSubmitVaccinationOpen} onOpenChange={setIsSubmitVaccinationOpen}>
-        <DialogTrigger asChild>
-        </DialogTrigger>
+      <Dialog
+        open={isSubmitVaccinationOpen}
+        onOpenChange={setIsSubmitVaccinationOpen}
+      >
+        <DialogTrigger asChild></DialogTrigger>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Select date & time (Optional)</DialogTitle>
@@ -319,7 +346,6 @@ export default function VaccinationsPage() {
               It's an optional step. You can simply click on submit to continue.
             </DialogDescription>
           </DialogHeader>
-
 
           <form className="grid gap-4 py-2">
             <div>
@@ -360,10 +386,11 @@ export default function VaccinationsPage() {
                   id="date"
                   type="date"
                   value={statusForm.date}
-                  onChange={(e) => setStatusForm({ ...statusForm, date: e.target.value })}
+                  onChange={(e) =>
+                    setStatusForm({ ...statusForm, date: e.target.value })
+                  }
                 />
               </div>
-
 
               <div>
                 <Label htmlFor="time">Time</Label>
@@ -371,31 +398,42 @@ export default function VaccinationsPage() {
                   id="time"
                   type="time"
                   value={statusForm.time}
-                  onChange={(e) => setStatusForm({ ...statusForm, time: e.target.value })}
+                  onChange={(e) =>
+                    setStatusForm({ ...statusForm, time: e.target.value })
+                  }
                   placeholder="--:--"
                 />
               </div>
             </div>
-
 
             <div>
               <Label htmlFor="note">Note</Label>
               <Textarea
                 id="note"
                 value={statusForm.note}
-                onChange={(e) => setStatusForm({ ...statusForm, note: e.target.value })}
+                onChange={(e) =>
+                  setStatusForm({ ...statusForm, note: e.target.value })
+                }
                 placeholder="Add an optional note..."
                 className="min-h-[88px]"
               />
             </div>
 
-
             <DialogFooter>
               <div className="flex w-full items-center justify-end gap-2">
-                <Button variant="outline" className="cursor-pointer" onClick={() => setIsSubmitVaccinationOpen(false)} type="button">
+                <Button
+                  variant="outline"
+                  className="cursor-pointer"
+                  onClick={() => setIsSubmitVaccinationOpen(false)}
+                  type="button"
+                >
                   Cancel
                 </Button>
-                <Button type="submit" className="cursor-pointer" onClick={handleChangeVaccinationStatus}>
+                <Button
+                  type="submit"
+                  className="cursor-pointer"
+                  onClick={handleChangeVaccinationStatus}
+                >
                   Submit
                 </Button>
               </div>
@@ -516,16 +554,19 @@ export default function VaccinationsPage() {
             <Progress value={getProgressPercentage()} className="h-2" />
             <div className="flex justify-between">
               <div
-                className={`w-3 h-3 rounded-full ${currentStep >= 1 ? "bg-pink-500" : "bg-gray-300"
-                  }`}
+                className={`w-3 h-3 rounded-full ${
+                  currentStep >= 1 ? "bg-pink-500" : "bg-gray-300"
+                }`}
               />
               <div
-                className={`w-3 h-3 rounded-full ${currentStep >= 2 ? "bg-pink-500" : "bg-gray-300"
-                  }`}
+                className={`w-3 h-3 rounded-full ${
+                  currentStep >= 2 ? "bg-pink-500" : "bg-gray-300"
+                }`}
               />
               <div
-                className={`w-3 h-3 rounded-full ${currentStep >= 3 ? "bg-pink-500" : "bg-gray-300"
-                  }`}
+                className={`w-3 h-3 rounded-full ${
+                  currentStep >= 3 ? "bg-pink-500" : "bg-gray-300"
+                }`}
               />
             </div>
           </div>
@@ -715,10 +756,11 @@ export default function VaccinationsPage() {
                           : "outline"
                       }
                       size="sm"
-                      className={`rounded-full text-xs ${stepData.step2.sideEffects.includes(effect)
-                        ? "bg-pink-500 hover:bg-pink-600"
-                        : "bg-transparent"
-                        }`}
+                      className={`rounded-full text-xs ${
+                        stepData.step2.sideEffects.includes(effect)
+                          ? "bg-pink-500 hover:bg-pink-600"
+                          : "bg-transparent"
+                      }`}
                       onClick={() => handleSideEffectToggle(effect)}
                     >
                       {effect}

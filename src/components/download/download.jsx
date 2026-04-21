@@ -1,3 +1,5 @@
+import { DownloadIcon } from "lucide-react";
+import Link from "next/link";
 import { FaApple } from "react-icons/fa";
 import { IoLogoGooglePlaystore } from "react-icons/io5";
 
@@ -15,7 +17,7 @@ export default function Download() {
       </div>
 
       {/* Mobile App Card */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 flex flex-col items-center max-w-md w-full">
+      <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 flex flex-col items-center max-w-2xl w-full">
         <div className="mb-8 w-full">
           <div className="w-full border bg-gray-200 rounded-3xl shadow-2xl overflow-hidden">
             <img src="/Mobile.png" alt="Tiny Giggle Mobile App" />
@@ -28,12 +30,29 @@ export default function Download() {
         </h2>
         <p className="text-gray-400 text-sm mb-6">Get APK</p>
 
-        <div className="flex flex-wrap gap-4 justify-center">
+        <div className="flex  gap-4 justify-center">
+          <a
+            href={
+              "https://github.com/incognito-khan/tiny-giggle-apk-release/releases/download/v1.1/tiny-giggle-apk.apk"
+            }
+            download
+            className="cursor-pointer"
+          >
+            <button className="bg-black text-white px-6 py-5 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors">
+              <DownloadIcon className="w-7 h-7" />
+              <div className="text-left">
+                <div className="text-xs">Download</div>
+                <div className="font-semibold">Get APK</div>
+              </div>
+            </button>
+          </a>
+
           <button className="bg-black text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors">
             <FaApple className="w-7 h-7" />
             <div className="text-left">
               <div className="text-xs">Download on the</div>
               <div className="font-semibold">App Store</div>
+              <p className="text-xs">Coming Soon</p>
             </div>
           </button>
 
@@ -42,6 +61,7 @@ export default function Download() {
             <div className="text-left">
               <div className="text-xs">GET IT ON</div>
               <div className="font-semibold">Google Play</div>
+              <p className="text-xs">Coming Soon</p>
             </div>
           </button>
         </div>

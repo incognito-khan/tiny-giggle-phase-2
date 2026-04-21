@@ -39,7 +39,7 @@ export const testimonialsData = [
     name: "Fahmeda Nisha",
     title: "Mother of Ali",
     text: "Tiny Giggle has been a lifesaver! I can track my kids’ growth and milestones, upload precious memories, and even let grandparents see them.",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "/home/reviews/anime-avatar-1.png",
     rating: 5,
   },
   {
@@ -47,7 +47,7 @@ export const testimonialsData = [
     name: "Sidra Moeez",
     title: "Mother of Mirha",
     text: "I love that my family can stay connected with my child's progress, and the shopping section makes picking gifts so easy!",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "/home/reviews/anime-avatar-2.png",
     rating: 5,
   },
   // {

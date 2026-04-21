@@ -147,11 +147,11 @@ export default function Blogs() {
                     </div>
                   </Link>
 
-                  <button
+                  {/* <button
                     className={`w-12 h-12 bg-black group-hover:bg-brand rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110`}
                   >
                     <FaShareAlt className="w-5 h-5 text-white" />
-                  </button>
+                  </button> */}
                 </div>
               </div>
               <div className="absolute inset-0 rounded-2xl ring-2 ring-orange-200 ring-opacity-0 group-hover:ring-opacity-50 transition-all duration-500 pointer-events-none"></div>

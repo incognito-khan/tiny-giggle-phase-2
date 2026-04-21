@@ -54,11 +54,22 @@ import { Label } from "@/components/ui/label";
 import { babiesData } from "@/components/data/parent-dashboard/children/childrenData";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import { createChild, getSingleChild } from "@/store/slices/childSlice";
+import {
+  createChild,
+  getSingleChild,
+  removeChild,
+} from "@/store/slices/childSlice";
 import { uploadImage } from "@/store/slices/mediaSlice";
-import ParentHeader from '@/components/layout/header/parent-header';
+import ParentHeader from "@/components/layout/header/parent-header";
 import Loading from "@/components/loading";
 import { format } from "date-fns";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function ChildrenPage() {
   const user = useSelector((state) => state.auth.user);
@@ -83,12 +94,12 @@ export default function ChildrenPage() {
     (baby) =>
       baby.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       baby.parent.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      baby.program.toLowerCase().includes(searchTerm.toLowerCase())
+      baby.program.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   useEffect(() => {
     dispatch(
-      getSingleChild({ parentId: user.id, childId: childId, setLoading })
+      getSingleChild({ parentId: user.id, childId: childId, setLoading }),
     );
   }, []);
 
@@ -151,7 +162,7 @@ export default function ChildrenPage() {
     // 🔹 If all validations pass → API call
     try {
       const imageUrl = await dispatch(
-        uploadImage({ setLoading, parentId: user.id, file })
+        uploadImage({ setLoading, parentId: user.id, file }),
       ).unwrap();
       console.log(imageUrl, "imageUrl");
       const finalFormData = {
@@ -162,7 +173,7 @@ export default function ChildrenPage() {
         weight: parseFloat(formData.weight),
       };
       dispatch(
-        createChild({ setLoading, parentId: user.id, formData: finalFormData })
+        createChild({ setLoading, parentId: user.id, formData: finalFormData }),
       );
       setOpen(false);
       setFormData({
@@ -177,6 +188,21 @@ export default function ChildrenPage() {
       setPreview(null);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to add baby.");
+    }
+  };
+
+  const handleRemoveChild = async (childIdToRemove) => {
+    if (!childIdToRemove) return;
+    try {
+      await dispatch(
+        removeChild({
+          parentId: user.id,
+          childId: childIdToRemove,
+          setLoading,
+        }),
+      ).unwrap();
+    } catch (err) {
+      // error toast is already shown inside the thunk
     }
   };
 
@@ -198,8 +224,11 @@ export default function ChildrenPage() {
     }
   };
 
+  console.log(child, "child");
+  console.log(childId, "childId");
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 w-[81vw]">
+    <div className="min-h-screen w-full bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
       {loading && <Loading />}
       <div className="flex">
         {/* Sidebar */}
@@ -211,7 +240,7 @@ export default function ChildrenPage() {
           {/* Page Content */}
           <div className="p-4 lg:p-6 space-y-6">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
               <Card className="bg-gradient-to-br from-pink-100 to-pink-200 border-pink-200 rounded-3xl hover:shadow-lg transition-all cursor-pointer">
                 <CardContent className="p-4 lg:p-6">
                   <div className="text-center">
@@ -220,9 +249,6 @@ export default function ChildrenPage() {
                     </p>
                     <p className="text-2xl lg:text-3xl font-bold text-pink-800 mb-2">
                       6
-                    </p>
-                    <p className="text-xs text-pink-600">
-                      +2 compared to last month
                     </p>
                   </div>
                 </CardContent>
@@ -237,9 +263,6 @@ export default function ChildrenPage() {
                     <p className="text-2xl lg:text-3xl font-bold text-purple-800 mb-2">
                       47
                     </p>
-                    <p className="text-xs text-purple-600">
-                      +8 compared to last month
-                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -252,9 +275,6 @@ export default function ChildrenPage() {
                     </p>
                     <p className="text-2xl lg:text-3xl font-bold text-blue-800 mb-2">
                       12
-                    </p>
-                    <p className="text-xs text-blue-600">
-                      +1 compared to last month
                     </p>
                   </div>
                 </CardContent>
@@ -269,13 +289,10 @@ export default function ChildrenPage() {
                     <p className="text-2xl lg:text-3xl font-bold text-green-800 mb-2">
                       8
                     </p>
-                    <p className="text-xs text-green-600">
-                      +3 compared to last month
-                    </p>
                   </div>
                 </CardContent>
               </Card>
-            </div>
+            </div> */}
 
             {/* Children List */}
             <Card className="bg-white/80 backdrop-blur-sm border-pink-100 rounded-3xl">
@@ -284,7 +301,7 @@ export default function ChildrenPage() {
                   <h2 className="text-xl font-bold text-gray-800">Baby List</h2>
 
                   <div className="flex items-center gap-3">
-                    <div className="relative">
+                    {/* <div className="relative">
                       <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       <Input
                         placeholder="Search anything here"
@@ -292,9 +309,9 @@ export default function ChildrenPage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10 w-64 bg-gray-50 border-gray-200 rounded-full text-sm"
                       />
-                    </div>
+                    </div> */}
 
-                    <Button
+                    {/* <Button
                       variant="outline"
                       size="sm"
                       className="rounded-full border-gray-300"
@@ -310,13 +327,13 @@ export default function ChildrenPage() {
                     >
                       <Download className="w-4 h-4 mr-2" />
                       Export
-                    </Button>
+                    </Button> */}
 
                     {/* <Button className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 rounded-full">
                       <Plus className="w-4 h-4 mr-2" />
                       Add Baby
                     </Button> */}
-                    {user?.role === 'parent' && (
+                    {user?.role === "parent" && (
                       <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
                           <Button className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 rounded-full">
@@ -342,12 +359,23 @@ export default function ChildrenPage() {
                             </div>
                             <div>
                               <Label className="mb-2">Type</Label>
-                              <Input
-                                name="type"
+                              <Select
                                 value={formData.type}
-                                onChange={handleChange}
-                                placeholder="BOY, GIRL"
-                              />
+                                onValueChange={(value) =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    type: value,
+                                  }))
+                                }
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Select type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="BOY">Boy</SelectItem>
+                                  <SelectItem value="GIRL">Girl</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
                             <div>
                               <Label className="mb-2">Birthday</Label>
@@ -433,74 +461,83 @@ export default function ChildrenPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-pink-100 hover:bg-transparent">
-                        <TableHead className="text-gray-600 font-semibold">
-                          Name
-                        </TableHead>
-                        <TableHead className="text-gray-600 font-semibold">
-                          DOB
-                        </TableHead>
-                        <TableHead className="text-gray-600 font-semibold">
-                          Program
-                        </TableHead>
-                        <TableHead className="text-gray-600 font-semibold">
-                          Parent
-                        </TableHead>
-                        <TableHead className="text-gray-600 font-semibold">
-                          Next Checkup
-                        </TableHead>
-                        <TableHead className="text-gray-600 font-semibold">
-                          Status
-                        </TableHead>
-                        <TableHead className="text-gray-600 font-semibold">
-                          Action
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow className="border-pink-50 hover:bg-pink-25 transition-colors">
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-10 h-10">
-                              <AvatarImage
-                                src={child?.avatar}
-                              />
-                              <AvatarFallback className="bg-gradient-to-r from-pink-400 to-purple-400 text-white text-sm">
-                                {child?.avatar}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-semibold text-gray-800">
-                                {child?.name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {child?.currentAge?.years} • {child?.weight} •{" "}
-                                {child?.height}
-                              </p>
+                  {child && Object.keys(child).length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-pink-100 hover:bg-transparent">
+                          <TableHead className="text-gray-600 font-semibold">
+                            Name
+                          </TableHead>
+                          <TableHead className="text-gray-600 font-semibold">
+                            DOB
+                          </TableHead>
+                          <TableHead className="text-gray-600 font-semibold">
+                            Weight
+                          </TableHead>
+                          <TableHead className="text-gray-600 font-semibold">
+                            Height
+                          </TableHead>
+                          <TableHead className="text-gray-600 font-semibold">
+                            BMI Status
+                          </TableHead>
+                          <TableHead className="text-gray-600 font-semibold">
+                            Gender
+                          </TableHead>
+                          {user?.role === "parent" && (
+                            <TableHead className="text-gray-600 font-semibold">
+                              Action
+                            </TableHead>
+                          )}
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow className="border-pink-50 hover:bg-pink-25 transition-colors">
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-10 h-10">
+                                <AvatarImage src={child?.avatar} />
+                                <AvatarFallback className="bg-gradient-to-r from-pink-400 to-purple-400 text-white text-sm">
+                                  {child?.avatar}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-semibold text-gray-800">
+                                  {child?.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {/* {c?.currentAge?.years === 0
+                                      ? `${c?.currentAge?.months} months`
+                                      : c?.currentAge?.months === 0
+                                        ? `${c?.currentAge?.days} days`
+                                        : `${c?.currentAge?.years} years`}{" "} */}
+                                  {child?.currentAge?.years} years
+                                  {/* • {c?.weight} •{" "}
+                                    {c?.height} */}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {formatDate(child?.birthday)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className="bg-blue-50 text-blue-700 border-blue-200 rounded-full"
-                          >
-                            Dance
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          {child?.type}
-                        </TableCell>
-                        <TableCell className="text-gray-600">
-                          2025-09-10
-                        </TableCell>
-                        <TableCell>{child.bmiStatus}</TableCell>
-                        {/* <TableCell>
+                          </TableCell>
+                          <TableCell className="text-gray-600">
+                            {formatDate(child?.birthday)}
+                          </TableCell>
+                          <TableCell className="text-gray-600">
+                            {child?.lastGrowth?.weight}
+                          </TableCell>
+                          <TableCell className="text-gray-600">
+                            {child?.lastGrowth?.height}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className="bg-blue-50 text-blue-700 border-blue-200 rounded-full"
+                            >
+                              {child?.bmiStatus}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-gray-600">
+                            {child?.type}
+                          </TableCell>
+                          {/* <TableCell>
                             <Badge
                               className={`${getStatusColor(
                                 baby.status
@@ -509,51 +546,66 @@ export default function ChildrenPage() {
                               {baby.status}
                             </Badge>
                           </TableCell> */}
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                          <TableCell>
+                            {user?.role === "parent" && (
                               <Button
                                 variant="ghost"
-                                size="icon"
-                                className="w-8 h-8 rounded-full hover:bg-pink-100"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                                onClick={() => handleRemoveChild(child?.id)}
                               >
-                                <MoreVertical className="w-4 h-4" />
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Remove
                               </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="rounded-xl"
-                            >
-                              {user?.role === 'parent' && (
+                            )}
+                            {/* <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="w-8 h-8 rounded-full hover:bg-pink-100"
+                                >
+                                  <MoreVertical className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="end"
+                                className="rounded-xl"
+                              >
+                                {user?.role === "parent" && (
+                                  <DropdownMenuItem className="rounded-lg">
+                                    <Edit className="w-4 h-4 mr-2" />
+                                    Edit Profile
+                                  </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem className="rounded-lg">
-                                  <Edit className="w-4 h-4 mr-2" />
-                                  Edit Profile
+                                  <Camera className="w-4 h-4 mr-2" />
+                                  View Memories
                                 </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem className="rounded-lg">
-                                <Camera className="w-4 h-4 mr-2" />
-                                View Memories
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="rounded-lg">
-                                <Heart className="w-4 h-4 mr-2" />
-                                Milestones
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="rounded-lg">
-                                <Clock className="w-4 h-4 mr-2" />
-                                Daily Routine
-                              </DropdownMenuItem>
-                              {user?.role === 'parent' && (
-                                <DropdownMenuItem className="text-red-600 rounded-lg">
-                                  <Trash2 className="w-4 h-4 mr-2" />
-                                  Remove
+                                <DropdownMenuItem className="rounded-lg">
+                                  <Heart className="w-4 h-4 mr-2" />
+                                  Milestones
                                 </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+                                <DropdownMenuItem className="rounded-lg">
+                                  <Clock className="w-4 h-4 mr-2" />
+                                  Daily Routine
+                                </DropdownMenuItem>
+                                {user?.role === "parent" && (
+                                  <DropdownMenuItem className="text-red-600 rounded-lg">
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Remove
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu> */}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="text-center">
+                      <p>No children found</p>
+                    </div>
+                  )}
                 </div>
 
                 {filteredBabies.length === 0 && (

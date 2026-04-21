@@ -113,20 +113,24 @@ export default function LearningOpportunity() {
                 <div
                   className="w-full h-full bg-cover bg-center"
                   style={{
-                    backgroundImage:
-                      "url(https://html.vecurosoft.com/toddly/demo/assets/img/about/vs-about-h1-1.jpg)",
+                    // backgroundImage:
+                    //   "url(https://html.vecurosoft.com/toddly/demo/assets/img/about/vs-about-h1-1.jpg)",
+                    backgroundImage: "url(/home/about/top.jpeg)",
                   }}
                 ></div>
               </div>
             </div>
 
             {/* Experience Badge */}
-            <div className="absolute text-black top-9 flex justify-center gap-3 items-center left-[240px] z-20">
+            <div className="absolute text-black top-9 flex justify-center gap-3 items-center left-[220px] z-20">
               {/* <div className="text-2xl font-bold shrink-0 bg-purple-600 text-white w-[60px] h-[60px] rounded-full shadow-lg flex justify-center items-center">
                 21+
               </div> */}
               <div className="flex flex-col gap-1">
-                <div className="font-semibold uppercase text-sm">
+                <div
+                  className="text-xl font-bold text-gray-800 leading-tight"
+                  style={{ fontFamily: "var(--font-baloo2)" }}
+                >
                   A proud product of Softex Solution.
                 </div>
                 {/* <div className="font-semibold"></div> */}
@@ -139,20 +143,21 @@ export default function LearningOpportunity() {
                 <div
                   className="w-full h-full bg-cover bg-center"
                   style={{
-                    backgroundImage:
-                      "url(https://html.vecurosoft.com/toddly/demo/assets/img/about/vs-about-h1-2.jpg)",
+                    // backgroundImage:
+                    //   "url(https://html.vecurosoft.com/toddly/demo/assets/img/about/vs-about-h1-2.jpg)",
+                    backgroundImage: "url(/home/about/main.jpeg)",
                   }}
                 ></div>
               </div>
             </div>
 
             {/* Bottom Left Curved Section with Rocket */}
-            <div className="absolute bottom-10 left-0">
+            {/* <div className="absolute bottom-10 left-0">
               <div className="relative">
                 {/* Curved Background */}
-                <div className="bg-[#EFD7B3] w-[200px] h-[200px] rounded-full"></div>
+            {/* <div className="bg-[#EFD7B3] w-[200px] h-[200px] rounded-full"></div> */}
 
-                {/* Rocket */}
+            {/* Rocket 
                 <div className="absolute top-8 -left-10">
                   <motion.img
                     src="https://html.vecurosoft.com/toddly/demo/assets/img/about/vs-about-h1-ele-1.svg"
@@ -161,7 +166,7 @@ export default function LearningOpportunity() {
                   />
                 </div>
 
-                {/* Ballon */}
+                {/* Ballon 
                 <div className="absolute top-12 left-20">
                   <motion.img
                     src="https://html.vecurosoft.com/toddly/demo/assets/img/about/vs-about-h1-ele-2.svg"
@@ -170,7 +175,7 @@ export default function LearningOpportunity() {
                   />
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Right Side - Content */}

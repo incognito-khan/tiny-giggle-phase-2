@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useRef } from "react"
-import { Swiper, SwiperSlide } from "swiper/react"
-import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules"
-import { Star, Quote } from "lucide-react"
+import { useRef } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay, EffectFade } from "swiper/modules";
+import { Star, Quote } from "lucide-react";
 
-import "swiper/css"
-import "swiper/css/navigation"
-import "swiper/css/pagination"
-import "swiper/css/effect-fade"
-import { testimonialsData } from "@/components/data/home/testominaldata"
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/effect-fade";
+import { testimonialsData } from "@/components/data/home/testominaldata";
 
 export default function CustomerFeedback() {
-  const swiperRef = useRef(null)
+  const swiperRef = useRef(null);
 
   return (
     <div className="relative overflow-hidden">
@@ -38,7 +38,9 @@ export default function CustomerFeedback() {
           <div
             className="w-full h-full bg-cover bg-center min-h-[600px]"
             style={{
-              backgroundImage: "url(https://html.vecurosoft.com/toddly/demo/assets/img/feedback/feedback-image-1-1.jpg)",
+              backgroundImage:
+                // "url(https://html.vecurosoft.com/toddly/demo/assets/img/feedback/feedback-image-1-1.jpg)",
+                "url(/home/reviews/main.jpeg)",
             }}
           ></div>
         </div>
@@ -47,7 +49,12 @@ export default function CustomerFeedback() {
         <div className="bg-slate-800 text-white p-12 flex flex-col justify-center relative">
           {/* Decorative Cloud */}
           <div className="absolute top-8 right-8">
-            <svg width="80" height="50" viewBox="0 0 80 50" className="text-white opacity-80">
+            <svg
+              width="80"
+              height="50"
+              viewBox="0 0 80 50"
+              className="text-white opacity-80"
+            >
               <path
                 d="M20 35C15 35 10 30 10 25C10 20 15 15 20 15C22 10 27 5 35 5C43 5 48 10 50 15C55 15 60 20 60 25C60 30 55 35 50 35H20Z"
                 fill="currentColor"
@@ -59,7 +66,9 @@ export default function CustomerFeedback() {
 
           {/* Header */}
           <div className="mb-8">
-            <p className="text-gray-400 text-sm font-medium tracking-wider uppercase mb-2">Parent & Family Reviews</p>
+            <p className="text-gray-400 text-sm font-medium tracking-wider uppercase mb-2">
+              Parent & Family Reviews
+            </p>
             {/* <h2 className="text-4xl font-bold leading-tight">
               Customer <span className="text-orange-500">Feedback</span> For
               <br />
@@ -76,7 +85,7 @@ export default function CustomerFeedback() {
           <div className="mb-8">
             <Swiper
               onSwiper={(swiper) => {
-                swiperRef.current = swiper
+                swiperRef.current = swiper;
               }}
               modules={[Navigation, Pagination, Autoplay, EffectFade]}
               effect="fade"
@@ -95,8 +104,10 @@ export default function CustomerFeedback() {
               pagination={{
                 clickable: true,
                 bulletClass: "swiper-pagination-bullet testimonial-bullet",
-                bulletActiveClass: "swiper-pagination-bullet-active testimonial-bullet-active",
-                renderBullet: (index, className) => `<span class="${className}"></span>`,
+                bulletActiveClass:
+                  "swiper-pagination-bullet-active testimonial-bullet-active",
+                renderBullet: (index, className) =>
+                  `<span class="${className}"></span>`,
               }}
               className="testimonial-swiper"
             >
@@ -124,20 +135,29 @@ export default function CustomerFeedback() {
 
                       {/* Name and Title */}
                       <div>
-                        <h3 className="text-xl font-bold text-white">{testimonial.name}</h3>
-                        <p className="text-orange-500 font-medium">{testimonial.title}</p>
+                        <h3 className="text-xl font-bold text-white">
+                          {testimonial.name}
+                        </h3>
+                        <p className="text-orange-500 font-medium">
+                          {testimonial.title}
+                        </p>
                       </div>
                     </div>
 
                     {/* Star Rating */}
                     <div className="flex gap-1 mb-6">
                       {[...Array(testimonial.rating)].map((_, index) => (
-                        <Star key={index} className="w-5 h-5 text-orange-500 fill-orange-500" />
+                        <Star
+                          key={index}
+                          className="w-5 h-5 text-orange-500 fill-orange-500"
+                        />
                       ))}
                     </div>
 
                     {/* Testimonial Text */}
-                    <p className="text-gray-300 leading-relaxed text-lg">"{testimonial.text}"</p>
+                    <p className="text-gray-300 leading-relaxed text-lg">
+                      "{testimonial.text}"
+                    </p>
                   </div>
                 </SwiperSlide>
               ))}
@@ -162,5 +182,5 @@ export default function CustomerFeedback() {
         </svg>
       </div>
     </div>
-  )
+  );
 }

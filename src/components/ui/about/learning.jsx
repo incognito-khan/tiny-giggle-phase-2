@@ -120,11 +120,12 @@ export default function Learning() {
 
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex gap-5 items-center">
-          <div className="relative w-full">
+          <div className="relative h-[600px] w-full">
             <img
-              className=""
-              src="https://html.vecurosoft.com/toddly/demo/assets/img/about/vs-about-h3-1.png"
+              // src="https://html.vecurosoft.com/toddly/demo/assets/img/about/vs-about-h3-1.png"
+              src="/professionals/join.png"
               alt=""
+              className="h-full"
             />
           </div>
 

@@ -34,24 +34,54 @@ export const Res = {
 
   error: (opts: ResponseOptions) => buildResponse({ ...opts, success: false }),
 
-  // Optional helpers for specific codes
-  ok: (opts: Omit<ResponseOptions, "status">) =>
-    buildResponse({ ...opts, success: true, status: 200 }),
+  // Helpers for specific codes with optional options
+  ok: (opts?: Partial<Omit<ResponseOptions, "status">>) =>
+    buildResponse({
+      success: true,
+      message: opts?.message || "Success",
+      ...opts,
+      status: 200,
+    }),
 
-  created: (opts: Omit<ResponseOptions, "status">) =>
-    buildResponse({ ...opts, success: true, status: 201 }),
+  created: (opts?: Partial<Omit<ResponseOptions, "status">>) =>
+    buildResponse({
+      success: true,
+      message: opts?.message || "Created",
+      ...opts,
+      status: 201,
+    }),
 
-  badRequest: (opts: Omit<ResponseOptions, "status">) =>
-    buildResponse({ ...opts, success: false, status: 400 }),
+  badRequest: (opts?: Partial<Omit<ResponseOptions, "status">>) =>
+    buildResponse({
+      success: false,
+      message: opts?.message || "Bad request",
+      ...opts,
+      status: 400,
+    }),
 
-  unauthorized: (opts: Omit<ResponseOptions, "status">) =>
-    buildResponse({ ...opts, success: false, status: 401 }),
+  unauthorized: (opts?: Partial<Omit<ResponseOptions, "status">>) =>
+    buildResponse({
+      success: false,
+      message: opts?.message || "Unauthorized",
+      ...opts,
+      status: 401,
+    }),
 
-  forbidden: (opts: Omit<ResponseOptions, "status">) =>
-    buildResponse({ ...opts, success: false, status: 403 }),
+  forbidden: (opts?: Partial<Omit<ResponseOptions, "status">>) =>
+    buildResponse({
+      success: false,
+      message: opts?.message || "Forbidden",
+      ...opts,
+      status: 403,
+    }),
 
-  notFound: (opts: Omit<ResponseOptions, "status">) =>
-    buildResponse({ ...opts, success: false, status: 404 }),
+  notFound: (opts?: Partial<Omit<ResponseOptions, "status">>) =>
+    buildResponse({
+      success: false,
+      message: opts?.message || "Not found",
+      ...opts,
+      status: 404,
+    }),
 
   serverError: (opts?: Partial<ResponseOptions>) =>
     buildResponse({

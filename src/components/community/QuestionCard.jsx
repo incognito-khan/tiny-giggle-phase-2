@@ -2,20 +2,25 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card.jsx";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.jsx";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
-import { 
-  MessageSquare, 
-  Heart, 
-  Eye, 
-  Clock, 
+import {
+  MessageSquare,
+  Heart,
+  Eye,
+  Clock,
   ChevronRight,
   TrendingUp,
   ShieldCheck,
   Stethoscope,
   User,
   ShoppingBag,
-  Music
+  Music,
+  Trash2,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
@@ -30,7 +35,7 @@ const ROLE_ICONS = {
   ARTIST: { icon: Music, color: "text-indigo-500", bg: "bg-indigo-50" },
 };
 
-export default function QuestionCard({ question, onLike }) {
+export default function QuestionCard({ question, onLike, role, onDelete, currentUserId }) {
   const roleInfo = ROLE_ICONS[question.authorType] || ROLE_ICONS.PARENT;
   const IconComponent = roleInfo.icon;
 
@@ -41,7 +46,7 @@ export default function QuestionCard({ question, onLike }) {
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3 }}
     >
-      <Link href={`/community/${question.id}`}>
+      <Link href={`/${role}-dashboard/community/${question.id}`}>
         <Card className="group border-none shadow-xl shadow-slate-200/50 bg-white/70 backdrop-blur-md hover:bg-white transition-all overflow-hidden rounded-[2rem]">
           <CardContent className="p-6">
             <div className="flex flex-col gap-4">
@@ -51,11 +56,15 @@ export default function QuestionCard({ question, onLike }) {
                   <div className="relative">
                     <Avatar className="w-12 h-12 ring-2 ring-white shadow-sm">
                       <AvatarImage src={question.authorAvatar} />
-                      <AvatarFallback className={roleInfo.bg + " " + roleInfo.color}>
+                      <AvatarFallback
+                        className={roleInfo.bg + " " + roleInfo.color}
+                      >
                         {question.authorName?.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
-                    <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${roleInfo.bg} flex items-center justify-center border-2 border-white shadow-sm`}>
+                    <div
+                      className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${roleInfo.bg} flex items-center justify-center border-2 border-white shadow-sm`}
+                    >
                       <IconComponent className={`w-3 h-3 ${roleInfo.color}`} />
                     </div>
                   </div>
@@ -64,22 +73,25 @@ export default function QuestionCard({ question, onLike }) {
                       {question.authorName}
                     </h4>
                     <div className="flex items-center gap-2">
-                       <Badge variant="secondary" className={`text-[10px] uppercase tracking-tighter font-black ${roleInfo.bg} ${roleInfo.color} border-none`}>
-                         {question.authorType}
-                       </Badge>
-                       <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                         <Clock className="w-3 h-3" />
-                         {formatDistanceToNow(new Date(question.createdAt))} ago
-                       </span>
+                      <Badge
+                        variant="secondary"
+                        className={`text-[10px] uppercase tracking-tighter font-black ${roleInfo.bg} ${roleInfo.color} border-none`}
+                      >
+                        {question.authorType}
+                      </Badge>
+                      <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {formatDistanceToNow(new Date(question.createdAt))} ago
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {question._count?.likes > 10 && (
-                   <div className="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1">
-                     <TrendingUp className="w-3 h-3" />
-                     Trending
-                   </div>
+                  <div className="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    Trending
+                  </div>
                 )}
               </div>
 
@@ -98,9 +110,11 @@ export default function QuestionCard({ question, onLike }) {
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5 text-slate-400 group/item">
                     <MessageSquare className="w-4 h-4 group-hover/item:text-blue-500 transition-colors" />
-                    <span className="text-xs font-bold text-slate-600">{question._count?.answers || 0}</span>
+                    <span className="text-xs font-bold text-slate-600">
+                      {question._count?.answers || 0}
+                    </span>
                   </div>
-                  <button 
+                  <button
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -108,19 +122,39 @@ export default function QuestionCard({ question, onLike }) {
                     }}
                     className={`flex items-center gap-1.5 transition-all hover:scale-110 active:scale-95 ${question.isLiked ? "text-rose-500" : "text-slate-400"} group/item`}
                   >
-                    <Heart className={`w-4 h-4 transition-colors ${question.isLiked ? "fill-rose-500 text-rose-500" : "group-hover/item:text-rose-500"}`} />
-                    <span className={`text-xs font-bold ${question.isLiked ? "text-rose-600" : "text-slate-600"}`}>
+                    <Heart
+                      className={`w-4 h-4 transition-colors ${question.isLiked ? "fill-rose-500 text-rose-500" : "group-hover/item:text-rose-500"}`}
+                    />
+                    <span
+                      className={`text-xs font-bold ${question.isLiked ? "text-rose-600" : "text-slate-600"}`}
+                    >
                       {question._count?.likes || 0}
                     </span>
                   </button>
                   <div className="flex items-center gap-1.5 text-slate-400">
                     <Eye className="w-4 h-4" />
-                    <span className="text-xs font-bold text-slate-600">{question.views || 0}</span>
+                    <span className="text-xs font-bold text-slate-600">
+                      {question.views || 0}
+                    </span>
                   </div>
                 </div>
 
-                <div className="bg-slate-50 group-hover:bg-purple-600 p-2 rounded-xl transition-all">
-                  <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" />
+                <div className="flex items-center gap-2">
+                  {onDelete && question.authorId === currentUserId && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onDelete(question.id);
+                      }}
+                      className="bg-slate-50 hover:bg-rose-50 p-2 rounded-xl transition-all group/delete"
+                    >
+                      <Trash2 className="w-5 h-5 text-slate-400 group-hover/delete:text-rose-500 transition-colors" />
+                    </button>
+                  )}
+                  <div className="bg-slate-50 group-hover:bg-purple-600 p-2 rounded-xl transition-all">
+                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" />
+                  </div>
                 </div>
               </div>
             </div>

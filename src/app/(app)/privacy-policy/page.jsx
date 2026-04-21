@@ -4,178 +4,167 @@ export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-blue-50 py-12 px-4 sm:px-8 lg:px-16 text-gray-800">
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-3xl p-8 sm:p-12 border border-pink-100">
-        <h1 className="text-3xl sm:text-4xl font-bold text-center text-pink-600 mb-8">
-          TinyGiggle Privacy Policy
+        <h1 className="text-3xl sm:text-4xl font-bold text-center text-pink-600 mb-4">
+          Tiny Giggle – Privacy Policy
         </h1>
 
         <p className="text-center text-gray-600 mb-10">
-          Last updated: <strong>October 2025</strong>
+          Effective Date: <strong>April 10, 2026</strong>
         </p>
 
         <section className="space-y-6">
           <p>
-            TinyGiggle is a mobile application owned and operated by{" "}
-            <strong>Softex Solution (a Division of AyeshaSG)</strong> ("we,"
-            "us," or "our"). TinyGiggle is designed for parents and legal
-            guardians of infants and toddlers (ages 1 month to 4 years),
-            enabling them to track developmental milestones, manage routines,
-            and share content in a secure and family-oriented community.
+            Welcome to Tiny Giggle ("we," "our," or "us"). Your privacy is
+            important to us. This Privacy Policy explains how we collect, use,
+            and protect your information when you use our platform ("Platform").
           </p>
-
-          <p>
-            This Privacy Policy outlines how we collect, use, store, and share
-            personal information, and explains the rights of our users. We are
-            committed to complying with applicable U.S. privacy laws, including
-            the Children’s Online Privacy Protection Act (COPPA), and have
-            designed our policies accordingly.
-          </p>
+          <p>By using Tiny Giggle, you agree to this Privacy Policy.</p>
 
           {/* Section 1 */}
           <h2 className="text-2xl font-semibold text-secondary mt-10">
-            1. Scope and Acceptance
+            1. Information We Collect
           </h2>
-          <p>
-            By accessing or using the TinyGiggle mobile application (“App”), you
-            acknowledge that you have read and understood this Privacy Policy
-            and consent to the collection, use, and disclosure of your
-            information as described herein. This Policy applies solely to the
-            TinyGiggle App and not to any third-party services.
-          </p>
+          <p>We may collect the following types of information:</p>
+
+          <h3 className="text-lg font-semibold text-gray-700">
+            Personal Information
+          </h3>
+          <ul className="list-disc list-inside space-y-2 pl-4">
+            <li>Name</li>
+            <li>Email address</li>
+            <li>Account details</li>
+          </ul>
+
+          <h3 className="text-lg font-semibold text-gray-700">
+            Child Information
+          </h3>
+          <ul className="list-disc list-inside space-y-2 pl-4">
+            <li>
+              Baby's name, age, and growth details (only what you choose to
+              provide)
+            </li>
+          </ul>
+
+          <h3 className="text-lg font-semibold text-gray-700">
+            Professional Information (Doctors & Caretakers)
+          </h3>
+          <ul className="list-disc list-inside space-y-2 pl-4">
+            <li>Name, qualifications, and contact details</li>
+            <li>Verification and background check information</li>
+          </ul>
+
+          <h3 className="text-lg font-semibold text-gray-700">
+            Usage Information
+          </h3>
+          <ul className="list-disc list-inside space-y-2 pl-4">
+            <li>How you use the Platform</li>
+            <li>Pages visited, features used, and activity data</li>
+          </ul>
 
           {/* Section 2 */}
           <h2 className="text-2xl font-semibold text-secondary mt-10">
-            2. Information We Collect
+            2. How We Use Your Information
           </h2>
-          <p>
-            We collect the following categories of information when users
-            interact with the App:
-          </p>
-
-          <ul className="list-disc list-inside space-y-3 pl-4">
-            <li>
-              <strong>Personal Information (Parent/Guardian):</strong> Full
-              name, email address, authentication details (OTP, biometric data)
-            </li>
-            <li>
-              <strong>Child Profile Data:</strong> Child’s age, birthdate,
-              milestones, health-related notes
-            </li>
-            <li>
-              <strong>Media and Content:</strong> Photos, videos, and other
-              media voluntarily uploaded by users
-            </li>
-            <li>
-              <strong>Usage Data:</strong> App interactions, device info, IP
-              address
-            </li>
-            <li>
-              <strong>Transaction Data:</strong> Purchase history, payment and
-              shipping details
-            </li>
+          <p>We use your information to:</p>
+          <ul className="list-disc list-inside space-y-2 pl-4">
+            <li>Provide and improve our services</li>
+            <li>Help you track your baby's growth</li>
+            <li>Connect parents with doctors and caretakers</li>
+            <li>Verify professionals before allowing access</li>
+            <li>Communicate updates, notifications, or support</li>
+            <li>Ensure safety and prevent misuse</li>
           </ul>
 
           {/* Section 3 */}
           <h2 className="text-2xl font-semibold text-secondary mt-10">
-            3. Purpose of Data Collection and Use
+            3. Sharing of Information
           </h2>
+          <p>We do not sell your personal information.</p>
+          <p>We may share information in the following cases:</p>
           <ul className="list-disc list-inside space-y-2 pl-4">
-            <li>To provide and maintain TinyGiggle’s core features</li>
-            <li>To enable e-commerce transactions through the TinyGiggle Store</li>
-            <li>To enhance user experience and app performance through analytics</li>
-            <li>To communicate updates, reminders, and security alerts</li>
-            <li>To comply with laws and legal obligations</li>
+            <li>
+              <strong>With Professionals:</strong> When you connect with doctors
+              or caretakers
+            </li>
+            <li>
+              <strong>With Service Providers:</strong> To help run and improve
+              the Platform
+            </li>
+            <li>
+              <strong>Legal Requirements:</strong> If required by law or
+              authorities
+            </li>
           </ul>
 
           {/* Section 4 */}
           <h2 className="text-2xl font-semibold text-secondary mt-10">
-            4. Data Storage and Third-Party Sharing
+            4. Data Protection
           </h2>
           <p>
-            All user data, including uploaded media, is securely stored on{" "}
-            <strong>Contabo</strong> cloud servers using encrypted protocols. We
-            do not sell or lease user data. Limited information may be shared
-            with service providers for delivery, communication, and payment
-            processing only.
+            We take reasonable steps to protect your information from
+            unauthorized access, misuse, or loss.
+          </p>
+          <p>
+            However, no online platform is 100% secure, so we encourage you to
+            keep your account details safe.
           </p>
 
           {/* Section 5 */}
           <h2 className="text-2xl font-semibold text-secondary mt-10">
-            5. Data Security Measures
+            5. Children's Privacy
           </h2>
           <p>
-            We use industry-standard safeguards to protect your data from
-            unauthorized access or loss.
+            Tiny Giggle is designed for parents. We only collect children's
+            information that parents choose to provide.
           </p>
-          <ul className="list-disc list-inside space-y-2 pl-4">
-            <li>OTP verification and biometric login</li>
-            <li>Encrypted data at rest and in transit</li>
-            <li>Access restricted to authorized personnel</li>
-          </ul>
+          <p>
+            Parents are responsible for ensuring the accuracy and safety of the
+            information shared.
+          </p>
 
           {/* Section 6 */}
           <h2 className="text-2xl font-semibold text-secondary mt-10">
-            6. User Rights and Data Management
+            6. Your Rights
           </h2>
-          <p>
-            As a parent or guardian, you can request to access, update, or
-            delete your data by contacting us at{" "}
-            <a
-              href="mailto:info@tinygiggle.com"
-              className="text-pink-500 underline"
-            >
-              info@tinygiggle.com
-            </a>
-            . Identity verification will be required.
-          </p>
+          <p>You may:</p>
+          <ul className="list-disc list-inside space-y-2 pl-4">
+            <li>Access or update your information</li>
+            <li>Request deletion of your account</li>
+            <li>Stop using the Platform at any time</li>
+          </ul>
 
           {/* Section 7 */}
           <h2 className="text-2xl font-semibold text-secondary mt-10">
-            7. Children’s Privacy Compliance (COPPA)
+            7. Third-Party Services
           </h2>
           <p>
-            TinyGiggle is not for direct use by children under 13. We do not
-            collect data directly from children, and all child-related
-            information is managed by parents or guardians only. If we learn
-            that data from a child was collected without parental consent, it
-            will be deleted immediately.
+            Tiny Giggle may include links or connections to third-party
+            professionals or services.
+          </p>
+          <p>
+            We are not responsible for their privacy practices, so please review
+            their policies separately.
           </p>
 
           {/* Section 8 */}
           <h2 className="text-2xl font-semibold text-secondary mt-10">
-            8. TinyGiggle Store Privacy
+            8. Changes to This Policy
           </h2>
+          <p>We may update this Privacy Policy from time to time.</p>
           <p>
-            The TinyGiggle Store includes only admin-uploaded products. All
-            payments are securely processed via trusted gateways, and financial
-            data is never stored locally.
+            Any changes will be posted on the Platform with a new effective
+            date.
           </p>
 
           {/* Section 9 */}
           <h2 className="text-2xl font-semibold text-secondary mt-10">
-            9. International Data Transfers
+            9. Contact Us
           </h2>
           <p>
-            User data may be stored in the U.S. or EU. We apply appropriate
-            safeguards for cross-border privacy compliance.
+            If you have any questions about this Privacy Policy, you can contact
+            us at:
           </p>
-
-          {/* Section 10 */}
-          <h2 className="text-2xl font-semibold text-secondary mt-10">
-            10. Updates to This Privacy Policy
-          </h2>
           <p>
-            We may update this Policy periodically. Major updates will be
-            notified in-app or via email. Continued use after updates implies
-            acceptance.
-          </p>
-
-          {/* Section 11 */}
-          <h2 className="text-2xl font-semibold text-secondary mt-10">
-            11. Contact Information
-          </h2>
-          <p>
-            <strong>Softex Solution (Division of AyeshaSG)</strong>
-            <br />
             Email:{" "}
             <a
               href="mailto:support@tinygiggle.com"
@@ -183,13 +172,11 @@ export default function PrivacyPolicy() {
             >
               support@tinygiggle.com
             </a>
-            <br />
-            Address: 3050, Manhattan, Kansas 66506, USA
           </p>
 
           <p className="mt-10 text-center text-gray-600 italic">
-            By using the TinyGiggle app, you consent to the data practices
-            outlined in this Privacy Policy.
+            By using the Tiny Giggle platform, you agree to the practices
+            described in this Privacy Policy.
           </p>
         </section>
       </div>

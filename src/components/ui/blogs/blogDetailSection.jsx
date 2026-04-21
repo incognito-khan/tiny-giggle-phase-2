@@ -205,9 +205,8 @@ export default function BlogDetail({ post }) {
               </div>
             </article>
             {/* Author Bio Section */}
-            <div className="bg-[#70197a] rounded-2xl p-8 text-white mb-8">
+            {/* <div className="bg-[#70197a] rounded-2xl p-8 text-white mb-8">
               <div className="flex items-start gap-6">
-                {/* Author Avatar */}
                 <div className="w-20 h-20 rounded-full overflow-hidden border-3 border-brand flex-shrink-0">
                   <div
                     className="w-full h-full bg-cover bg-center"
@@ -218,7 +217,6 @@ export default function BlogDetail({ post }) {
                   ></div>
                 </div>
 
-                {/* Author Info */}
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-white mb-3">
                     Alexra Dadder
@@ -230,7 +228,7 @@ export default function BlogDetail({ post }) {
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Comments Section */}
             <div className="rounded-2xl p-8 mb-8">

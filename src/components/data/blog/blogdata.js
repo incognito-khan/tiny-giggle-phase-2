@@ -180,7 +180,8 @@ export const blogPosts = [
       ],
     },
     image:
-      "https://html.vecurosoft.com/toddly/demo/assets/img/blog/vs-blog-b1-1.jpg",
+      // "https://html.vecurosoft.com/toddly/demo/assets/img/blog/vs-blog-b1-1.jpg",
+      "/blogs/blog-1.png",
     author: "Tiny Giggle Admin",
     date: "September 12, 2025",
     category: "Kindergarten",
@@ -210,7 +211,7 @@ export const blogPosts = [
       ],
     },
     image:
-      "https://html.vecurosoft.com/toddly/demo/assets/img/blog/vs-blog-b1-2.jpg",
+      "/blogs/blog-2.png",
     author: "Sarah Bennett (Guest Contributor)",
     date: "October 03, 2025",
     category: "Kindergarten",
@@ -240,7 +241,7 @@ export const blogPosts = [
       ],
     },
     image:
-      "https://html.vecurosoft.com/toddly/demo/assets/img/blog/vs-blog-b1-2.jpg",
+      "/blogs/blog-3.png",
     author: "Emily Rivers (Tiny Giggle Contributor)",
     date: "November 15, 2025",
     category: "Education",

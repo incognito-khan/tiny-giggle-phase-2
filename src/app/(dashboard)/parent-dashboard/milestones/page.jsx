@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getAllMilestonesWithSubForChild,
-  toggleMilestoneAchieved
+  toggleMilestoneAchieved,
 } from "@/store/slices/milestoneSlice";
 import Loading from "@/components/loading";
 import { Label } from "@/components/ui/label";
@@ -18,11 +18,18 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogDescription,
-  DialogFooter
-} from "@/components/ui/dialog"
-import { Table, TableBody, TableCaption, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import ParentHeader from "@/components/layout/header/parent-header";
-import MilestoneCard from "@/components/milestone/card"
+import MilestoneCard from "@/components/milestone/card";
 
 export default function Milestones() {
   const milestones = useSelector((state) => state.milestone.milestones);
@@ -40,8 +47,8 @@ export default function Milestones() {
     date: "",
     note: "",
     status: "",
-    time: ""
-  })
+    time: "",
+  });
   const [isSumbitMilestoneOpen, setIsSumbitMilestoneOpen] = useState(false);
   const [milestoneId, setMilestoneId] = useState(null);
   const [file, setFile] = useState(null);
@@ -49,7 +56,13 @@ export default function Milestones() {
   const dispatch = useDispatch();
 
   const gettingAllMilestones = () => {
-    dispatch(getAllMilestonesWithSubForChild({ setLoading, parentId: user.id, childId }));
+    dispatch(
+      getAllMilestonesWithSubForChild({
+        setLoading,
+        parentId: user.id,
+        childId,
+      }),
+    );
   };
 
   useEffect(() => {
@@ -63,9 +76,17 @@ export default function Milestones() {
     const body = {
       achieved: statusForm.status,
       achievedAt: statusForm.date,
-      note: statusForm.note
-    }
-    dispatch(toggleMilestoneAchieved({ setLoading, parentId: user?.id, childId, subMilestoneId: milestoneId, body }))
+      note: statusForm.note,
+    };
+    dispatch(
+      toggleMilestoneAchieved({
+        setLoading,
+        parentId: user?.id,
+        childId,
+        subMilestoneId: milestoneId,
+        body,
+      }),
+    );
     setStatusForm({
       status: "",
       date: "",
@@ -73,37 +94,46 @@ export default function Milestones() {
     });
     setMilestoneId(null);
     setIsSumbitMilestoneOpen(false);
-  }
+  };
 
   function handleEditMilestone(milestone, e) {
-    if (e) e.stopPropagation()
-    setMilestoneDialog({ open: true, mode: "edit", milestone })
+    if (e) e.stopPropagation();
+    setMilestoneDialog({ open: true, mode: "edit", milestone });
   }
 
   function handleDeleteMilestone(id, e) {
-    if (e) e.stopPropagation()
+    if (e) e.stopPropagation();
     // setMilestones((list) => list.filter((m) => m.id !== id))
-    dispatch(deleteMilestone({ setLoading, milestoneId: id, adminId: user?.id }))
+    dispatch(
+      deleteMilestone({ setLoading, milestoneId: id, adminId: user?.id }),
+    );
   }
 
   function handleAddSubMilestone(parentId, e) {
-    if (e) e.stopPropagation()
-    setSubDialog({ open: true, parentId, mode: "add", subMilestone: null })
+    if (e) e.stopPropagation();
+    setSubDialog({ open: true, parentId, mode: "add", subMilestone: null });
   }
 
   function handleEditSubMilestone(parentId, sub, e) {
-    if (e) e.stopPropagation()
-    setSubDialog({ open: true, parentId, mode: "edit", subMilestone: sub })
+    if (e) e.stopPropagation();
+    setSubDialog({ open: true, parentId, mode: "edit", subMilestone: sub });
   }
 
   function handleDeleteSubMilestone(parentId, subId, e) {
-    if (e) e.stopPropagation()
-    dispatch(deleteSubMilestone({ setLoading, milestoneId: parentId, subId, adminId: user?.id }))
+    if (e) e.stopPropagation();
+    dispatch(
+      deleteSubMilestone({
+        setLoading,
+        milestoneId: parentId,
+        subId,
+        adminId: user?.id,
+      }),
+    );
   }
 
   function handleShowMileStatus(e, status, id) {
     e.preventDefault();
-    console.log(id, 'milestone Id')
+    console.log(id, "milestone Id");
     setStatusForm({ ...statusForm, status: status });
     setMilestoneId(id);
     if (status) {
@@ -112,7 +142,7 @@ export default function Milestones() {
   }
 
   useEffect(() => {
-    console.log(milestoneId, 'milestoneId')
+    console.log(milestoneId, "milestoneId");
     if (!statusForm.status && statusForm.status === false) {
       handleToggleAchieve();
     }
@@ -149,14 +179,25 @@ export default function Milestones() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <MilestoneCard miles={milestones} handleEditMilestone={handleEditMilestone} handleDeleteMilestone={handleDeleteMilestone} handleAddSubMilestone={handleAddSubMilestone} handleEditSubMilestone={handleEditSubMilestone} handleDeleteSubMilestone={handleDeleteSubMilestone} parent={true} handleShowMileStatus={handleShowMileStatus} />
+              <MilestoneCard
+                miles={milestones}
+                handleEditMilestone={handleEditMilestone}
+                handleDeleteMilestone={handleDeleteMilestone}
+                handleAddSubMilestone={handleAddSubMilestone}
+                handleEditSubMilestone={handleEditSubMilestone}
+                handleDeleteSubMilestone={handleDeleteSubMilestone}
+                parent={true}
+                handleShowMileStatus={handleShowMileStatus}
+              />
             </TableBody>
           </Table>
         </section>
 
-        <Dialog open={isSumbitMilestoneOpen} onOpenChange={setIsSumbitMilestoneOpen}>
-          <DialogTrigger asChild>
-          </DialogTrigger>
+        <Dialog
+          open={isSumbitMilestoneOpen}
+          onOpenChange={setIsSumbitMilestoneOpen}
+        >
+          <DialogTrigger asChild></DialogTrigger>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Select date & time</DialogTitle>
@@ -164,7 +205,6 @@ export default function Milestones() {
                 It's an optional step. You can simply click on submit to continue.
               </DialogDescription> */}
             </DialogHeader>
-
 
             <form className="grid gap-4 py-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -174,10 +214,11 @@ export default function Milestones() {
                     id="date"
                     type="date"
                     value={statusForm.date}
-                    onChange={(e) => setStatusForm({ ...statusForm, date: e.target.value })}
+                    onChange={(e) =>
+                      setStatusForm({ ...statusForm, date: e.target.value })
+                    }
                   />
                 </div>
-
 
                 <div>
                   <Label htmlFor="time">Time</Label>
@@ -185,31 +226,40 @@ export default function Milestones() {
                     id="time"
                     type="time"
                     value={statusForm.time}
-                    onChange={(e) => setStatusForm({ ...statusForm, time: e.target.value })}
+                    onChange={(e) =>
+                      setStatusForm({ ...statusForm, time: e.target.value })
+                    }
                     placeholder="--:--"
                   />
                 </div>
               </div>
-
 
               <div>
                 <Label htmlFor="note">Note (Optional)</Label>
                 <Textarea
                   id="note"
                   value={statusForm.note}
-                  onChange={(e) => setStatusForm({ ...statusForm, note: e.target.value })}
+                  onChange={(e) =>
+                    setStatusForm({ ...statusForm, note: e.target.value })
+                  }
                   placeholder="Add an optional note..."
                   className="min-h-[88px]"
                 />
               </div>
 
-
               <DialogFooter>
                 <div className="flex w-full items-center justify-end gap-2">
-                  <Button variant="outline" className="cursor-pointer" onClick={() => setIsSumbitMilestoneOpen(false)} type="button">
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={() => setIsSumbitMilestoneOpen(false)}
+                    type="button"
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" className="cursor-pointer"
+                  <Button
+                    type="submit"
+                    className="cursor-pointer"
                     onClick={handleToggleAchieve}
                   >
                     Submit
@@ -223,7 +273,10 @@ export default function Milestones() {
         {/* Empty State (if no milestones) */}
         {milestones?.length === 0 && !loading && (
           <div className="text-center py-16">
-            <h2>No Milestone Found</h2>
+            <h2>
+              No Milestone Found.
+              {childId?.length ? "" : " Please select a child first"}
+            </h2>
           </div>
         )}
       </div>

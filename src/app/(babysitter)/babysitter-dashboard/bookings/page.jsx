@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { 
-  Search, 
-  MessageCircle, 
-  Phone, 
-  Mail, 
+import {
+  Search,
+  MessageCircle,
+  Phone,
+  Mail,
   MoreVertical,
   Filter,
   Clock,
@@ -15,10 +15,19 @@ import {
   Grid3x3,
   Loader2,
   Calendar,
-  Baby
+  Baby,
 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card.jsx";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.jsx";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card.jsx";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Input } from "@/components/ui/input.jsx";
@@ -34,21 +43,21 @@ const getStatusStyles = (status) => {
         badge: "bg-emerald-50 text-emerald-600 border-emerald-100",
         icon: CheckCircle,
         dotColor: "bg-emerald-500",
-        label: "Accepted"
+        label: "Accepted",
       };
     case "COMPLETED":
       return {
         badge: "bg-purple-50 text-purple-600 border-purple-100",
         icon: CheckCircle,
         dotColor: "bg-purple-500",
-        label: "Completed"
+        label: "Completed",
       };
     case "PENDING":
       return {
         badge: "bg-amber-50 text-amber-600 border-amber-100",
         icon: Clock,
         dotColor: "bg-amber-500",
-        label: "Pending"
+        label: "Pending",
       };
     case "REJECTED":
     case "CANCELLED":
@@ -56,14 +65,28 @@ const getStatusStyles = (status) => {
         badge: "bg-rose-50 text-rose-600 border-rose-100",
         icon: AlertCircle,
         dotColor: "bg-rose-500",
-        label: status === "REJECTED" ? "Rejected" : "Cancelled"
+        label: status === "REJECTED" ? "Rejected" : "Cancelled",
+      };
+    case "REFUNDED":
+      return {
+        badge: "bg-slate-100 text-slate-500 border-slate-200",
+        icon: AlertCircle,
+        dotColor: "bg-slate-400",
+        label: "Refunded",
+      };
+    case "NOT_ATTENDED":
+      return {
+        badge: "bg-rose-50 text-rose-500 border-rose-100",
+        icon: AlertCircle,
+        dotColor: "bg-rose-400",
+        label: "No Show",
       };
     default:
       return {
         badge: "bg-slate-50 text-slate-600 border-slate-100",
         icon: Clock,
         dotColor: "bg-slate-400",
-        label: status || "Unknown"
+        label: status || "Unknown",
       };
   }
 };
@@ -100,7 +123,9 @@ export default function BabysitterBookings() {
   const handleUpdateStatus = async (bookingId, status) => {
     setActionLoading(bookingId);
     try {
-      const { data } = await PATCH(`/appointments/${bookingId}/status`, { status });
+      const { data } = await PATCH(`/appointments/${bookingId}/status`, {
+        status,
+      });
       if (data.success) {
         toast.success(`Booking ${status.toLowerCase()} successfully`);
         fetchBookings();
@@ -115,6 +140,17 @@ export default function BabysitterBookings() {
     }
   };
 
+  const isGracePeriodOver = (appTime) => {
+    //     const fifteenMinutesLater = new Date(appointmentTime.getTime() + 15 * 60000);
+    // return new Date() > fifteenMinutesLater;
+    const appointmentTime = new Date(appTime);
+    const gracePeriodMinutes = 1; // Temporarily reduced to 1 minute for testing
+    const gracePeriodTime = new Date(
+      appointmentTime.getTime() + gracePeriodMinutes * 60000,
+    );
+    return new Date() > gracePeriodTime;
+  };
+
   const handleChatClick = async (booking) => {
     setChatLoading(booking.id);
     try {
@@ -123,12 +159,18 @@ export default function BabysitterBookings() {
         return;
       }
 
-      const payloadBody = booking.childId 
-        ? { patientId: booking.childId, parentId: booking.parentId || booking.parent?.id }
+      const payloadBody = booking.childId
+        ? {
+            patientId: booking.childId,
+            parentId: booking.parentId || booking.parent?.id,
+          }
         : { parentId: booking.parentId || booking.parent?.id };
 
       // Check for existing chat
-      const { data: checkData } = await POST("/babysitters/chats/check", payloadBody);
+      const { data: checkData } = await POST(
+        "/babysitters/chats/check",
+        payloadBody,
+      );
 
       if (checkData?.success) {
         if (checkData.data?.id) {
@@ -164,15 +206,14 @@ export default function BabysitterBookings() {
     return bookings.filter((booking) => {
       const parentName = booking.parent?.name || "";
       const childName = booking.child?.name || "";
-      
-      const matchesSearch = 
+
+      const matchesSearch =
         parentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         childName.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = 
-        selectedStatus === "all" || 
-        booking.status === selectedStatus;
-      
+
+      const matchesStatus =
+        selectedStatus === "all" || booking.status === selectedStatus;
+
       return matchesSearch && matchesStatus;
     });
   }, [bookings, searchTerm, selectedStatus]);
@@ -182,8 +223,12 @@ export default function BabysitterBookings() {
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-indigo-600 bg-clip-text text-transparent">My Bookings</h1>
-          <p className="text-slate-500 mt-1 font-medium">Manage your childcare sessions and appointments</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-indigo-600 bg-clip-text text-transparent">
+            My Bookings
+          </h1>
+          <p className="text-slate-500 mt-1 font-medium">
+            Manage your childcare sessions and appointments
+          </p>
         </div>
 
         {/* Search and Filter Bar */}
@@ -198,7 +243,7 @@ export default function BabysitterBookings() {
               className="pl-10 h-12 rounded-2xl bg-white border-slate-200 focus:border-purple-500 focus:ring-purple-500 shadow-sm"
             />
           </div>
-          
+
           <div className="flex gap-2 flex-wrap">
             <Button
               variant={selectedStatus === "all" ? "default" : "outline"}
@@ -277,8 +322,8 @@ export default function BabysitterBookings() {
               const StatusIcon = statusStyle.icon;
 
               return (
-                <Card 
-                  key={booking.id} 
+                <Card
+                  key={booking.id}
                   className="border-slate-100 hover:shadow-xl hover:shadow-purple-500/5 transition-all duration-300 rounded-[2rem] overflow-hidden group border-2 hover:border-purple-200 bg-white/50 backdrop-blur-xl"
                 >
                   <CardContent className="p-6">
@@ -287,19 +332,28 @@ export default function BabysitterBookings() {
                       <div className="flex items-center gap-4 flex-1">
                         <div className="relative">
                           <Avatar className="h-16 w-16 border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300">
-                            <AvatarImage src={booking.parent?.profilePicture} alt={booking.parent?.name} />
+                            <AvatarImage
+                              src={booking.parent?.profilePicture}
+                              alt={booking.parent?.name}
+                            />
                             <AvatarFallback className="bg-purple-100 text-purple-700 font-bold text-xl">
                               {booking.parent?.name?.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
-                          <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm ${statusStyle.dotColor}`} />
+                          <div
+                            className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm ${statusStyle.dotColor}`}
+                          />
                         </div>
-                        
+
                         <div className="flex-1">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Parent</p>
-                          <h3 className="text-xl font-bold text-slate-800 leading-tight">{booking.parent?.name}</h3>
-                          <Badge 
-                            variant="outline" 
+                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+                            Parent
+                          </p>
+                          <h3 className="text-xl font-bold text-slate-800 leading-tight">
+                            {booking.parent?.name}
+                          </h3>
+                          <Badge
+                            variant="outline"
                             className={`${statusStyle.badge} text-[10px] uppercase font-black tracking-wider px-3 py-1 mt-2 flex items-center gap-1.5 w-fit rounded-full border border-current`}
                           >
                             <StatusIcon className="w-3 h-3 block" />
@@ -310,84 +364,159 @@ export default function BabysitterBookings() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 mb-6">
-                       {/* Date & Time */}
-                       <div className="bg-purple-50/50 p-4 rounded-2xl border border-purple-100/50">
-                         <p className="text-[10px] font-black uppercase text-purple-400 tracking-widest leading-none mb-2 flex items-center gap-1"><Calendar className="w-3 h-3" /> Scheduled</p>
-                         <p className="text-sm font-bold text-slate-800">{format(new Date(booking.appointmentDate), "MMM do, yyyy")}</p>
-                         <p className="text-xs font-semibold text-slate-500 mt-1">{format(new Date(booking.appointmentDate), "h:mm a")}</p>
-                       </div>
+                      {/* Date & Time */}
+                      <div className="bg-purple-50/50 p-4 rounded-2xl border border-purple-100/50">
+                        <p className="text-[10px] font-black uppercase text-purple-400 tracking-widest leading-none mb-2 flex items-center gap-1">
+                          <Calendar className="w-3 h-3" /> Scheduled
+                        </p>
+                        <p className="text-sm font-bold text-slate-800">
+                          {format(
+                            new Date(booking.appointmentDate),
+                            "MMM do, yyyy",
+                          )}
+                        </p>
+                        <p className="text-xs font-semibold text-slate-500 mt-1">
+                          {format(new Date(booking.appointmentDate), "h:mm a")}
+                        </p>
+                      </div>
 
-                       {/* Child Info */}
-                       {booking.child ? (
-                         <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100/50">
-                           <p className="text-[10px] font-black uppercase text-indigo-400 tracking-widest leading-none mb-2 flex items-center gap-1"><Baby className="w-3 h-3" /> Child</p>
-                           <p className="text-sm font-bold text-slate-800">{booking.child.name}</p>
-                           <p className="text-xs font-semibold text-slate-500 mt-1">{booking.child.type}</p>
-                         </div>
-                       ) : (
-                         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center justify-center">
-                           <p className="text-xs font-medium text-slate-400">No child specified</p>
-                         </div>
-                       )}
+                      {/* Child Info */}
+                      {booking.child ? (
+                        <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100/50">
+                          <p className="text-[10px] font-black uppercase text-indigo-400 tracking-widest leading-none mb-2 flex items-center gap-1">
+                            <Baby className="w-3 h-3" /> Child
+                          </p>
+                          <p className="text-sm font-bold text-slate-800">
+                            {booking.child.name}
+                          </p>
+                          <p className="text-xs font-semibold text-slate-500 mt-1">
+                            {booking.child.type}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center justify-center">
+                          <p className="text-xs font-medium text-slate-400">
+                            No child specified
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Notes */}
                     {booking.notes && (
                       <div className="mb-6 px-4 py-3 bg-slate-50 rounded-2xl border border-slate-100 text-sm font-medium text-slate-600 line-clamp-2">
-                        <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-1">Notes</span>
+                        <span className="text-xs font-black uppercase tracking-wider text-slate-400 block mb-1">
+                          Notes
+                        </span>
                         {booking.notes}
                       </div>
                     )}
 
                     {/* Action Buttons */}
                     <div className="flex gap-3 mt-4">
-                      {booking.status === "PENDING" && (
-                        <>
-                          <Button 
-                            onClick={() => handleUpdateStatus(booking.id, "ACCEPTED")}
-                            disabled={actionLoading === booking.id}
-                            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white rounded-xl h-12 font-bold shadow-lg shadow-purple-200"
-                          >
-                            {actionLoading === booking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Accept"}
-                          </Button>
-                          <Button 
-                            onClick={() => handleUpdateStatus(booking.id, "REJECTED")}
-                            disabled={actionLoading === booking.id}
-                            variant="outline"
-                            className="flex-1 border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl h-12 font-bold"
-                          >
-                            {actionLoading === booking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Decline"}
-                          </Button>
-                        </>
-                      )}
-                      
+                      {booking.status === "PENDING" &&
+                        (booking.paymentMethod === "TINY_GIGGLE" ? (
+                          <div className="flex-1 flex flex-col items-center justify-center py-2 px-4 bg-purple-50 rounded-2xl border border-purple-100">
+                            <Badge className="bg-purple-600 text-white border-none text-[8px] font-black uppercase mb-1">
+                              Tiny Giggle Verified
+                            </Badge>
+                            <p className="text-[10px] font-bold text-purple-600 uppercase tracking-tighter text-center">
+                              Auto-accepting after payment
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <Button
+                              onClick={() =>
+                                handleUpdateStatus(booking.id, "ACCEPTED")
+                              }
+                              disabled={actionLoading === booking.id}
+                              className="flex-1 bg-purple-600 hover:bg-purple-700 text-white rounded-xl h-12 font-bold shadow-lg shadow-purple-200"
+                            >
+                              {actionLoading === booking.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                "Accept"
+                              )}
+                            </Button>
+                            <Button
+                              onClick={() =>
+                                handleUpdateStatus(booking.id, "REJECTED")
+                              }
+                              disabled={actionLoading === booking.id}
+                              variant="outline"
+                              className="flex-1 border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl h-12 font-bold"
+                            >
+                              {actionLoading === booking.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                "Decline"
+                              )}
+                            </Button>
+                          </>
+                        ))}
+
                       {booking.status === "ACCEPTED" && (
                         <>
-                          <Button 
-                            onClick={() => handleUpdateStatus(booking.id, "COMPLETED")}
+                          <Button
+                            onClick={() =>
+                              handleUpdateStatus(booking.id, "COMPLETED")
+                            }
                             disabled={actionLoading === booking.id}
                             className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12 font-bold shadow-lg shadow-emerald-200"
                           >
-                            {actionLoading === booking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Complete Session"}
+                            {actionLoading === booking.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              "Complete Session"
+                            )}
                           </Button>
-                          <Button 
+                          <Button
                             onClick={() => handleChatClick(booking)}
-                            disabled={chatLoading === booking.id || (!booking.parentId && !booking.parent?.id)}
+                            disabled={
+                              chatLoading === booking.id ||
+                              (!booking.parentId && !booking.parent?.id)
+                            }
                             className="flex-none bg-purple-600 hover:bg-purple-700 text-white rounded-xl h-12 px-6 font-bold shadow-lg gap-2"
                           >
-                            {chatLoading === booking.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
+                            {chatLoading === booking.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <MessageCircle className="w-4 h-4" />
+                            )}
                           </Button>
+
+                          {isGracePeriodOver(booking.appointmentDate) && (
+                            <Button
+                              onClick={() =>
+                                handleUpdateStatus(booking.id, "NOT_ATTENDED")
+                              }
+                              disabled={actionLoading === booking.id}
+                              variant="outline"
+                              className="flex-none border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl h-12 px-4 font-bold"
+                            >
+                              No Show
+                            </Button>
+                          )}
                         </>
                       )}
 
-                      {["COMPLETED", "REJECTED", "CANCELLED"].includes(booking.status) && (
-                         <Button 
-                           disabled
-                           variant="outline"
-                           className="w-full h-12 rounded-xl font-bold bg-slate-50 border-slate-200 text-slate-400"
-                         >
-                           {booking.status === "COMPLETED" ? "Session Completed" : "Archived"}
-                         </Button>
+                      {["COMPLETED", "REJECTED", "CANCELLED", "REFUNDED", "NOT_ATTENDED"].includes(
+                        booking.status,
+                      ) && (
+                        <Button
+                          disabled
+                          variant="outline"
+                          className="w-full h-12 rounded-xl font-bold bg-slate-50 border-slate-200 text-slate-400"
+                        >
+                          {booking.status === "COMPLETED"
+                            ? "Session Completed"
+                            : booking.status === "REFUNDED"
+                            ? "Refunded"
+                            : booking.status === "NOT_ATTENDED"
+                            ? "No Show / Refunded"
+                            : "Archived"}
+                        </Button>
                       )}
                     </div>
                   </CardContent>
@@ -399,8 +528,12 @@ export default function BabysitterBookings() {
               <div className="w-20 h-20 bg-purple-50 rounded-full flex items-center justify-center mb-4">
                 <Calendar className="w-10 h-10 text-purple-300" />
               </div>
-              <p className="text-xl font-black text-slate-800">No bookings found</p>
-              <p className="text-slate-500 font-medium mt-1 text-center max-w-sm">We couldn't find any bookings matching your current filters.</p>
+              <p className="text-xl font-black text-slate-800">
+                No bookings found
+              </p>
+              <p className="text-slate-500 font-medium mt-1 text-center max-w-sm">
+                We couldn't find any bookings matching your current filters.
+              </p>
             </div>
           )}
         </div>
@@ -410,44 +543,116 @@ export default function BabysitterBookings() {
             <div className="divide-y divide-slate-100 bg-white">
               {filteredBookings.map((booking) => {
                 const statusStyle = getStatusStyles(booking.status);
-                
+
                 return (
-                  <div 
+                  <div
                     key={booking.id}
                     className="flex items-center justify-between p-6 hover:bg-slate-50 transition-colors group"
                   >
                     <div className="flex items-center gap-4 flex-1">
                       <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
-                        <AvatarImage src={booking.parent?.profilePicture} alt={booking.parent?.name} />
-                        <AvatarFallback className="bg-purple-100 text-purple-700 font-bold">{booking.parent?.name?.charAt(0)}</AvatarFallback>
+                        <AvatarImage
+                          src={booking.parent?.profilePicture}
+                          alt={booking.parent?.name}
+                        />
+                        <AvatarFallback className="bg-purple-100 text-purple-700 font-bold">
+                          {booking.parent?.name?.charAt(0)}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h4 className="font-bold text-slate-800 leading-tight">{booking.parent?.name}</h4>
+                        <h4 className="font-bold text-slate-800 leading-tight">
+                          {booking.parent?.name}
+                        </h4>
                         <div className="flex items-center gap-2 mt-1">
-                           <Badge variant="outline" className={`${statusStyle.badge} text-[9px] uppercase font-black px-2 py-0 h-5`}>
-                             {statusStyle.label}
-                           </Badge>
-                           <span className="text-xs font-semibold text-slate-500">
-                             {format(new Date(booking.appointmentDate), "MMM d, h:mm a")}
-                           </span>
+                          <Badge
+                            variant="outline"
+                            className={`${statusStyle.badge} text-[9px] uppercase font-black px-2 py-0 h-5`}
+                          >
+                            {statusStyle.label}
+                          </Badge>
+                          <span className="text-xs font-semibold text-slate-500">
+                            {format(
+                              new Date(booking.appointmentDate),
+                              "MMM d, h:mm a",
+                            )}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3">
-                      {booking.status === "PENDING" && (
-                        <>
-                          <Button size="sm" onClick={() => handleUpdateStatus(booking.id, "ACCEPTED")} disabled={actionLoading === booking.id} className="bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg h-9 px-4">Accept</Button>
-                          <Button size="sm" onClick={() => handleUpdateStatus(booking.id, "REJECTED")} disabled={actionLoading === booking.id} variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50 font-bold rounded-lg h-9 px-4">Decline</Button>
-                        </>
-                      )}
+                      {booking.status === "PENDING" &&
+                        (booking.paymentMethod === "TINY_GIGGLE" ? (
+                          <Badge className="bg-purple-100 text-purple-600 border-none text-[8px] font-black uppercase">
+                            Waiting Payment
+                          </Badge>
+                        ) : (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleUpdateStatus(booking.id, "ACCEPTED")
+                              }
+                              disabled={actionLoading === booking.id}
+                              className="bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg h-9 px-4"
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() =>
+                                handleUpdateStatus(booking.id, "REJECTED")
+                              }
+                              disabled={actionLoading === booking.id}
+                              variant="outline"
+                              className="text-rose-600 border-rose-200 hover:bg-rose-50 font-bold rounded-lg h-9 px-4"
+                            >
+                              Decline
+                            </Button>
+                          </>
+                        ))}
                       {booking.status === "ACCEPTED" && (
                         <>
-                          <Button size="sm" onClick={() => handleUpdateStatus(booking.id, "COMPLETED")} disabled={actionLoading === booking.id} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg h-9 px-4">Complete</Button>
-                          <Button size="sm" onClick={() => handleChatClick(booking)} disabled={chatLoading === booking.id || (!booking.parentId && !booking.parent?.id)} className="bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg h-9 px-4 flex items-center gap-2">
-                            {chatLoading === booking.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <MessageCircle className="w-3 h-3" />}
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleUpdateStatus(booking.id, "COMPLETED")
+                            }
+                            disabled={actionLoading === booking.id}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg h-9 px-4"
+                          >
+                            Complete
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleChatClick(booking)}
+                            disabled={
+                              chatLoading === booking.id ||
+                              (!booking.parentId && !booking.parent?.id)
+                            }
+                            className="bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg h-9 px-4 flex items-center gap-2"
+                          >
+                            {chatLoading === booking.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <MessageCircle className="w-3 h-3" />
+                            )}
                             Chat
                           </Button>
+
+                          {isGracePeriodOver(booking.appointmentDate) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                handleUpdateStatus(booking.id, "NOT_ATTENDED")
+                              }
+                              disabled={actionLoading === booking.id}
+                              className="text-rose-600 border-rose-200 hover:bg-rose-50 font-bold rounded-lg h-9 px-3"
+                            >
+                              No Show
+                            </Button>
+                          )}
                         </>
                       )}
                     </div>
@@ -458,7 +663,9 @@ export default function BabysitterBookings() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16">
               <Calendar className="w-12 h-12 text-slate-200 mb-3" />
-              <p className="text-slate-600 font-medium text-lg">No bookings found</p>
+              <p className="text-slate-600 font-medium text-lg">
+                No bookings found
+              </p>
             </div>
           )}
         </Card>
@@ -468,33 +675,45 @@ export default function BabysitterBookings() {
       {!loading && filteredBookings.length > 0 && (
         <div className="grid grid-cols-3 gap-6 pt-6">
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
-             <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center shrink-0">
-               <Calendar className="w-6 h-6 text-purple-600" />
-             </div>
-             <div>
-               <p className="text-3xl font-black text-slate-800 leading-none mb-1">{bookings.length}</p>
-               <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">Total Bookings</p>
-             </div>
+            <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center shrink-0">
+              <Calendar className="w-6 h-6 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-3xl font-black text-slate-800 leading-none mb-1">
+                {bookings.length}
+              </p>
+              <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                Total Bookings
+              </p>
+            </div>
           </div>
-          
+
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
-             <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center shrink-0">
-               <CheckCircle className="w-6 h-6 text-emerald-600" />
-             </div>
-             <div>
-               <p className="text-3xl font-black text-slate-800 leading-none mb-1">{bookings.filter(b => b.status === "ACCEPTED").length}</p>
-               <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">Active Jobs</p>
-             </div>
+            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center shrink-0">
+              <CheckCircle className="w-6 h-6 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-3xl font-black text-slate-800 leading-none mb-1">
+                {bookings.filter((b) => b.status === "ACCEPTED").length}
+              </p>
+              <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                Active Jobs
+              </p>
+            </div>
           </div>
-          
+
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
-             <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center shrink-0">
-               <Clock className="w-6 h-6 text-amber-600" />
-             </div>
-             <div>
-               <p className="text-3xl font-black text-slate-800 leading-none mb-1">{bookings.filter(b => b.status === "PENDING").length}</p>
-               <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">Pending Requests</p>
-             </div>
+            <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center shrink-0">
+              <Clock className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-3xl font-black text-slate-800 leading-none mb-1">
+                {bookings.filter((b) => b.status === "PENDING").length}
+              </p>
+              <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+                Pending Requests
+              </p>
+            </div>
           </div>
         </div>
       )}

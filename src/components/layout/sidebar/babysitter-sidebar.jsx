@@ -45,7 +45,11 @@ const sidebarLinks = [
   { name: "Messages", href: "/chat", icon: MessageSquare },
   // { name: "My Earnings", href: "/babysitter-dashboard/earnings", icon: DollarSign },
   // { name: "Reviews", href: "/babysitter-dashboard/reviews", icon: Star },
-  { name: "Community", href: "/community", icon: MessageCircle },
+  {
+    name: "Community",
+    href: "/babysitter-dashboard/community",
+    icon: MessageCircle,
+  },
 ];
 
 const secondaryLinks = [

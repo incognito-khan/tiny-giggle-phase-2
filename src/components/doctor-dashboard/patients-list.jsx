@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { 
-  Search, 
-  MessageCircle, 
-  Phone, 
-  Mail, 
+import {
+  Search,
+  MessageCircle,
+  Phone,
+  Mail,
   MoreVertical,
   Filter,
   Clock,
@@ -13,15 +13,28 @@ import {
   AlertCircle,
   List,
   Grid3x3,
-  Loader2
+  Loader2,
+  Pill,
+  ClipboardList,
+  FileText,
+  FileUp,
 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card.jsx";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.jsx";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card.jsx";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar.jsx";
 import { Badge } from "@/components/ui/badge.jsx";
 import { Button } from "@/components/ui/button.jsx";
 import { Input } from "@/components/ui/input.jsx";
 import { useRouter } from "next/navigation";
-import { GET } from "@/lib/api";
+import { GET, POST } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -45,7 +58,7 @@ const mockPatientsData = [
     lastVisit: "2 days ago",
     conditions: ["Diabetes", "Hypertension"],
     hasChat: true,
-    chatId: "chat-marcus-001"
+    chatId: "chat-marcus-001",
   },
   {
     id: 2,
@@ -57,7 +70,7 @@ const mockPatientsData = [
     lastVisit: "1 week ago",
     conditions: ["Asthma"],
     hasChat: false,
-    chatId: null
+    chatId: null,
   },
   {
     id: 3,
@@ -69,7 +82,7 @@ const mockPatientsData = [
     lastVisit: "3 months ago",
     conditions: ["Allergies"],
     hasChat: true,
-    chatId: "chat-john-001"
+    chatId: "chat-john-001",
   },
   {
     id: 4,
@@ -81,7 +94,7 @@ const mockPatientsData = [
     lastVisit: "5 days ago",
     conditions: ["Pediatric Care", "Vaccination"],
     hasChat: true,
-    chatId: "chat-alaric-001"
+    chatId: "chat-alaric-001",
   },
   {
     id: 5,
@@ -93,7 +106,7 @@ const mockPatientsData = [
     lastVisit: "1 day ago",
     conditions: ["General Checkup"],
     hasChat: false,
-    chatId: null
+    chatId: null,
   },
   {
     id: 6,
@@ -105,7 +118,7 @@ const mockPatientsData = [
     lastVisit: "4 days ago",
     conditions: ["Migraine", "Stress Management"],
     hasChat: true,
-    chatId: "chat-caroline-001"
+    chatId: "chat-caroline-001",
   },
 ];
 
@@ -117,35 +130,35 @@ const getStatusStyles = (status) => {
         badge: "bg-emerald-50 text-emerald-600 border-emerald-100",
         icon: CheckCircle,
         dotColor: "bg-emerald-500",
-        label: "Active Session"
+        label: "Active Session",
       };
     case "COMPLETED":
       return {
         badge: "bg-purple-50 text-purple-600 border-purple-100",
         icon: CheckCircle,
         dotColor: "bg-purple-500",
-        label: "Completed"
+        label: "Completed",
       };
     case "PENDING":
       return {
         badge: "bg-amber-50 text-amber-600 border-amber-100",
         icon: Clock,
         dotColor: "bg-amber-500",
-        label: "Pending"
+        label: "Pending",
       };
     case "Inactive":
       return {
         badge: "bg-slate-50 text-slate-600 border-slate-100",
         icon: AlertCircle,
         dotColor: "bg-slate-400",
-        label: "Inactive"
+        label: "Inactive",
       };
     default:
       return {
         badge: "bg-slate-50 text-slate-600 border-slate-100",
         icon: Clock,
         dotColor: "bg-slate-400",
-        label: status
+        label: status,
       };
   }
 };
@@ -158,34 +171,84 @@ export default function PatientsList() {
   const [chatLoading, setChatLoading] = useState(null);
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPatientForSession, setSelectedPatientForSession] = useState(null);
-  const [sessionReport, setSessionReport] = useState("");
+  const [selectedPatientForSession, setSelectedPatientForSession] =
+    useState(null);
+  const [reportData, setReportData] = useState({
+    diagnosis: "",
+    prescription: "",
+    extraNotes: "",
+    reportUrl: "",
+  });
   const [endingSession, setEndingSession] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File is too large. Max 10MB allowed.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Using the base POST utility with multipart config
+      const { data } = await POST("/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (data.success && data.data?.url) {
+        setReportData((prev) => ({ ...prev, reportUrl: data.data.url }));
+        toast.success("Document uploaded successfully!");
+      } else {
+        toast.error("Upload failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("An error occurred during upload.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Fetch real patient data from API
   const fetchPatients = async () => {
     try {
       setLoading(true);
       const { data } = await GET("/patients");
-      
+
       if (data.success && data.data) {
         // Transform API data to match component expectations
-        const transformed = data.data.map(patient => ({
-          id: patient.id,
-          name: patient.firstName && patient.lastName 
-            ? `${patient.firstName} ${patient.lastName}` 
-            : patient.name || "Unknown",
-          email: patient.email || "",
-          phone: patient.phone || "",
-          avatar: patient.profilePicture || `https://i.pravatar.cc/150?u=${patient.id}`,
-          status: patient.status,
-          lastVisit: patient.lastVisit ? new Date(patient.lastVisit).toLocaleDateString() : "Never",
-          conditions: patient.medicalConditions || [],
-          hasChat: !!patient.chatId,
-          chatId: patient.chatId || null,
-          appointmentId: patient.appointmentId,
-          appointmentStatus: patient.appointmentStatus
-        }));
+        const transformed = data.data
+          .map((patient) => ({
+            id: patient.id,
+            name:
+              patient.firstName && patient.lastName
+                ? `${patient.firstName} ${patient.lastName}`
+                : patient.name || "Unknown",
+            email: patient.email || "",
+            phone: patient.phone || "",
+            avatar:
+              patient.profilePicture ||
+              `https://i.pravatar.cc/150?u=${patient.id}`,
+            status: patient.status,
+            lastVisit: patient.lastVisit
+              ? new Date(patient.lastVisit).toLocaleDateString()
+              : "Never",
+            lastVisitRaw: patient.lastVisit ? new Date(patient.lastVisit) : new Date(0),
+            conditions: patient.medicalConditions || [],
+            hasChat: !!patient.chatId,
+            chatId: patient.chatId || null,
+            appointmentId: patient.appointmentId,
+            appointmentStatus: patient.appointmentStatus,
+          }))
+          .sort((a, b) => b.lastVisitRaw - a.lastVisitRaw);
         setPatients(transformed);
       }
     } catch (error) {
@@ -202,27 +265,41 @@ export default function PatientsList() {
   }, []);
 
   const handleEndSession = async () => {
-    if (!selectedPatientForSession || !sessionReport.trim()) return;
-    
+    if (
+      !selectedPatientForSession ||
+      (!reportData.diagnosis &&
+        !reportData.prescription &&
+        !reportData.extraNotes)
+    )
+      return;
+
     setEndingSession(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/v1/appointments/${selectedPatientForSession.appointmentId}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+      const response = await fetch(
+        `/api/v1/appointments/${selectedPatientForSession.appointmentId}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: "COMPLETED",
+            ...reportData,
+          }),
         },
-        body: JSON.stringify({
-          status: "COMPLETED",
-          checkupReport: sessionReport
-        }),
-      });
+      );
 
       if (response.ok) {
         toast.success("Session ended and report saved successfully!");
         setSelectedPatientForSession(null);
-        setSessionReport("");
+        setReportData({
+          diagnosis: "",
+          prescription: "",
+          extraNotes: "",
+          reportUrl: "",
+        });
         // Refresh patients list
         fetchPatients();
       } else {
@@ -250,7 +327,7 @@ export default function PatientsList() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             patientId: patient.id,
@@ -280,16 +357,16 @@ export default function PatientsList() {
   // Filter patients
   const filteredPatients = useMemo(() => {
     return patients.filter((patient) => {
-      const matchesSearch = 
+      const matchesSearch =
         patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         patient.phone.includes(searchTerm);
-      
-      const matchesStatus = 
-        selectedStatus === "all" || 
+
+      const matchesStatus =
+        selectedStatus === "all" ||
         (selectedStatus === "Active" && patient.status === "ACCEPTED") ||
         (selectedStatus === "Completed" && patient.status === "COMPLETED");
-      
+
       return matchesSearch && matchesStatus;
     });
   }, [patients, searchTerm, selectedStatus]);
@@ -300,7 +377,9 @@ export default function PatientsList() {
       <div className="flex flex-col gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">My Patients</h1>
-          <p className="text-slate-500 mt-1">Manage and communicate with your patients</p>
+          <p className="text-slate-500 mt-1">
+            Manage and communicate with your patients
+          </p>
         </div>
 
         {/* Search and Filter Bar */}
@@ -315,7 +394,7 @@ export default function PatientsList() {
               className="pl-10 bg-white border-slate-200 focus:border-teal-500 focus:ring-teal-500"
             />
           </div>
-          
+
           <div className="flex gap-2 flex-wrap">
             <Button
               variant={selectedStatus === "all" ? "default" : "outline"}
@@ -394,8 +473,8 @@ export default function PatientsList() {
               const StatusIcon = statusStyle.icon;
 
               return (
-                <Card 
-                  key={patient.appointmentId || patient.id} 
+                <Card
+                  key={patient.appointmentId || patient.id}
                   className="border-slate-200 hover:shadow-lg transition-all duration-300 hover:border-teal-300 overflow-hidden group"
                 >
                   <CardContent className="p-6">
@@ -404,16 +483,25 @@ export default function PatientsList() {
                       <div className="flex items-center gap-4 flex-1">
                         <div className="relative">
                           <Avatar className="h-16 w-16 border-3 border-white shadow-md group-hover:scale-105 transition-transform">
-                            <AvatarImage src={patient.avatar} alt={patient.name} />
-                            <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                            <AvatarImage
+                              src={patient.avatar}
+                              alt={patient.name}
+                            />
+                            <AvatarFallback>
+                              {patient.name.charAt(0)}
+                            </AvatarFallback>
                           </Avatar>
-                          <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${statusStyle.dotColor}`} />
+                          <div
+                            className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${statusStyle.dotColor}`}
+                          />
                         </div>
-                        
+
                         <div className="flex-1">
-                          <h3 className="text-lg font-bold text-slate-800">{patient.name}</h3>
-                          <Badge 
-                            variant="outline" 
+                          <h3 className="text-lg font-bold text-slate-800">
+                            {patient.name}
+                          </h3>
+                          <Badge
+                            variant="outline"
                             className={`${statusStyle.badge} text-xs px-2 py-1 mt-2 flex items-center gap-1 w-fit`}
                           >
                             <StatusIcon className="w-3 h-3" />
@@ -422,7 +510,11 @@ export default function PatientsList() {
                         </div>
                       </div>
 
-                      <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-600 h-8 w-8">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-slate-400 hover:text-slate-600 h-8 w-8"
+                      >
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </div>
@@ -430,11 +522,13 @@ export default function PatientsList() {
                     {/* Conditions */}
                     {patient.conditions.length > 0 && (
                       <div className="mb-4 pb-4 border-b border-slate-100">
-                        <p className="text-xs font-semibold text-slate-500 mb-2">CONDITIONS</p>
+                        <p className="text-xs font-semibold text-slate-500 mb-2">
+                          CONDITIONS
+                        </p>
                         <div className="flex flex-wrap gap-2">
                           {patient.conditions.map((condition, idx) => (
-                            <Badge 
-                              key={idx} 
+                            <Badge
+                              key={idx}
                               variant="secondary"
                               className="bg-purple-100 text-purple-700 border-purple-200 text-xs"
                             >
@@ -449,7 +543,7 @@ export default function PatientsList() {
                     <div className="space-y-3 mb-4 pb-4 border-b border-slate-100">
                       <div className="flex items-center gap-3">
                         <Mail className="w-4 h-4 text-teal-600" />
-                        <a 
+                        <a
                           href={`mailto:${patient.email}`}
                           className="text-sm text-slate-600 hover:text-teal-600 transition-colors"
                         >
@@ -458,7 +552,7 @@ export default function PatientsList() {
                       </div>
                       <div className="flex items-center gap-3">
                         <Phone className="w-4 h-4 text-teal-600" />
-                        <a 
+                        <a
                           href={`tel:${patient.phone}`}
                           className="text-sm text-slate-600 hover:text-teal-600 transition-colors"
                         >
@@ -469,16 +563,20 @@ export default function PatientsList() {
 
                     {/* Last Visit */}
                     <div className="mb-4">
-                      <p className="text-xs font-semibold text-slate-500">LAST VISIT</p>
-                      <p className="text-sm text-slate-600 mt-1">{patient.lastVisit}</p>
+                      <p className="text-xs font-semibold text-slate-500">
+                        LAST VISIT
+                      </p>
+                      <p className="text-sm text-slate-600 mt-1">
+                        {patient.lastVisit}
+                      </p>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-3 pt-2">
+                    <div className="grid grid-cols-2 gap-3 pt-4">
                       <Button
                         onClick={() => handleChat(patient)}
                         disabled={chatLoading === patient.id}
-                        className="flex-1 bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center gap-2"
+                        className="w-full bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200/50 rounded-2xl h-11 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                       >
                         {chatLoading === patient.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -487,21 +585,23 @@ export default function PatientsList() {
                         )}
                         {patient.hasChat ? "Open Chat" : "Start Chat"}
                       </Button>
-                      {patient.appointmentStatus === "ACCEPTED" && (
+                      
+                      {patient.appointmentStatus === "ACCEPTED" ? (
                         <Button
                           onClick={() => setSelectedPatientForSession(patient)}
-                          className="flex-1 bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center gap-2"
+                          className="w-full bg-teal-600 hover:bg-teal-700 text-white rounded-2xl h-11 font-black shadow-lg shadow-teal-100 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                         >
-                          <CheckCircle className="w-4 h-4" />
+                          <CheckCircle className="w-4 h-4 text-teal-100" />
                           End Session
                         </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          className="w-full border-slate-200 text-slate-600 hover:bg-slate-50 rounded-2xl h-11 font-bold transition-all"
+                        >
+                          View Profile
+                        </Button>
                       )}
-                      <Button
-                        variant="outline"
-                        className="flex-1 border-slate-200 text-slate-600 hover:bg-slate-50"
-                      >
-                        View Profile
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -511,7 +611,9 @@ export default function PatientsList() {
             <div className="col-span-full flex flex-col items-center justify-center py-12 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200">
               <Search className="w-12 h-12 text-slate-300 mb-3" />
               <p className="text-slate-600 font-medium">No patients found</p>
-              <p className="text-slate-500 text-sm mt-1">Try adjusting your search or filters</p>
+              <p className="text-slate-500 text-sm mt-1">
+                Try adjusting your search or filters
+              </p>
             </div>
           )}
         </div>
@@ -524,20 +626,29 @@ export default function PatientsList() {
                 const StatusIcon = statusStyle.icon;
 
                 return (
-                  <div 
+                  <div
                     key={patient.id}
                     className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors last:border-0 group"
                   >
                     <div className="flex items-center gap-4 flex-1">
                       <div className="relative">
                         <Avatar className="h-12 w-12 border-2 border-white shadow-sm group-hover:scale-105 transition-transform">
-                          <AvatarImage src={patient.avatar} alt={patient.name} />
-                          <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage
+                            src={patient.avatar}
+                            alt={patient.name}
+                          />
+                          <AvatarFallback>
+                            {patient.name.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
-                        <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${statusStyle.dotColor}`} />
+                        <div
+                          className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${statusStyle.dotColor}`}
+                        />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-slate-800">{patient.name}</h4>
+                        <h4 className="font-semibold text-slate-800">
+                          {patient.name}
+                        </h4>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="text-xs text-slate-400 flex items-center gap-1">
                             <Mail className="w-3 h-3" /> {patient.email}
@@ -545,18 +656,20 @@ export default function PatientsList() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-4 flex-1 px-4">
                       <div className="flex flex-wrap gap-1">
-                        {patient.conditions.slice(0, 2).map((condition, idx) => (
-                          <Badge 
-                            key={idx} 
-                            variant="secondary"
-                            className="bg-purple-100 text-purple-700 border-purple-200 text-xs"
-                          >
-                            {condition}
-                          </Badge>
-                        ))}
+                        {patient.conditions
+                          .slice(0, 2)
+                          .map((condition, idx) => (
+                            <Badge
+                              key={idx}
+                              variant="secondary"
+                              className="bg-purple-100 text-purple-700 border-purple-200 text-xs"
+                            >
+                              {condition}
+                            </Badge>
+                          ))}
                         {patient.conditions.length > 2 && (
                           <Badge className="bg-slate-100 text-slate-600 border-slate-200 text-xs">
                             +{patient.conditions.length - 2}
@@ -565,8 +678,8 @@ export default function PatientsList() {
                       </div>
                     </div>
 
-                    <Badge 
-                      variant="outline" 
+                    <Badge
+                      variant="outline"
                       className={`${statusStyle.badge} text-xs px-2 py-1 flex items-center gap-1 w-fit`}
                     >
                       <StatusIcon className="w-3 h-3" />
@@ -577,25 +690,29 @@ export default function PatientsList() {
                       <Button
                         onClick={() => handleChat(patient)}
                         disabled={chatLoading === patient.id}
-                        size="sm"
-                        className="bg-teal-600 hover:bg-teal-700 text-white flex items-center gap-2"
+                        size="icon"
+                        className="h-10 w-10 bg-teal-50 hover:bg-teal-100 text-teal-600 border border-teal-200/50 rounded-xl transition-all hover:scale-110"
                       >
                         {chatLoading === patient.id ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
+                          <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
-                          <MessageCircle className="w-3 h-3" />
+                          <MessageCircle className="w-4 h-4" />
                         )}
                       </Button>
                       {patient.appointmentStatus === "ACCEPTED" && (
                         <Button
                           onClick={() => setSelectedPatientForSession(patient)}
-                          size="sm"
-                          className="bg-rose-600 hover:bg-rose-700 text-white"
+                          size="icon"
+                          className="h-10 w-10 bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-lg shadow-teal-100 transition-all hover:scale-110"
                         >
-                          <CheckCircle className="w-3 h-3" />
+                          <CheckCircle className="w-4 h-4" />
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-600 h-8 w-8">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-slate-400 hover:text-slate-600 h-10 w-10 rounded-xl"
+                      >
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </div>
@@ -607,7 +724,9 @@ export default function PatientsList() {
             <div className="flex flex-col items-center justify-center py-12">
               <Search className="w-12 h-12 text-slate-300 mb-3" />
               <p className="text-slate-600 font-medium">No patients found</p>
-              <p className="text-slate-500 text-sm mt-1">Try adjusting your search or filters</p>
+              <p className="text-slate-500 text-sm mt-1">
+                Try adjusting your search or filters
+              </p>
             </div>
           )}
         </Card>
@@ -618,14 +737,16 @@ export default function PatientsList() {
         <div className="grid grid-cols-3 gap-4 pt-4">
           <Card className="border-slate-200">
             <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-teal-600">{patients.length}</p>
+              <p className="text-2xl font-bold text-teal-600">
+                {patients.length}
+              </p>
               <p className="text-xs text-slate-500 mt-1">Total Patients</p>
             </CardContent>
           </Card>
           <Card className="border-slate-200">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-emerald-600">
-                {patients.filter(p => p.status === "ACCEPTED").length}
+                {patients.filter((p) => p.status === "ACCEPTED").length}
               </p>
               <p className="text-xs text-slate-500 mt-1">Active Sessions</p>
             </CardContent>
@@ -633,7 +754,7 @@ export default function PatientsList() {
           <Card className="border-slate-200">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-purple-600">
-                {filteredPatients.filter(p => p.hasChat).length}
+                {filteredPatients.filter((p) => p.hasChat).length}
               </p>
               <p className="text-xs text-slate-500 mt-1">Active Chats</p>
             </CardContent>
@@ -642,49 +763,182 @@ export default function PatientsList() {
       )}
 
       {/* End Session Dialog */}
-      <Dialog open={!!selectedPatientForSession} onOpenChange={(open) => !open && setSelectedPatientForSession(null)}>
-        <DialogContent className="sm:max-w-[500px] bg-white rounded-3xl p-6">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-slate-800">End Session</DialogTitle>
-            <DialogDescription className="text-slate-500">
-              Complete the session for {selectedPatientForSession?.name}. Please add a detailed checkup report for the parent.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4 space-y-4">
+      <Dialog
+        open={!!selectedPatientForSession}
+        onOpenChange={(open) => !open && setSelectedPatientForSession(null)}
+      >
+        <DialogContent className="sm:max-w-[600px] rounded-[2.5rem] border-none shadow-2xl p-0 overflow-hidden bg-white">
+          <div className="bg-slate-900 p-8 pb-10 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full blur-[80px] -z-0 translate-x-1/2 -translate-y-1/2" />
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-purple-500/10 rounded-full blur-[60px] -z-0" />
+            
+            <DialogHeader className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-teal-500/20 backdrop-blur-md flex items-center justify-center border border-teal-500/30">
+                  <ClipboardList className="w-6 h-6 text-teal-400" />
+                </div>
+                <div className="h-6 w-[1px] bg-white/20 mx-1" />
+                <Badge className="bg-emerald-500/20 text-emerald-300 border-none px-3 py-1 font-bold text-[10px] tracking-widest uppercase">Clinical Session</Badge>
+              </div>
+              <DialogTitle className="text-4xl font-black tracking-tight text-white leading-none">
+                Consultation <span className="text-teal-400">Report</span>
+              </DialogTitle>
+              <DialogDescription className="text-slate-400 font-medium text-lg mt-2">
+                Summarizing session with <span className="text-white font-bold">{selectedPatientForSession?.name}</span>
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          <div className="p-8 space-y-6 overflow-y-auto max-h-[60vh]">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                  <ClipboardList className="w-3 h-3 text-teal-500" /> Diagnosis
+                </Label>
+                <Textarea
+                  placeholder="What is the diagnosis?"
+                  value={reportData.diagnosis}
+                  onChange={(e) =>
+                    setReportData({ ...reportData, diagnosis: e.target.value })
+                  }
+                  className="rounded-2xl border-slate-100 font-bold min-h-[100px] focus:ring-teal-100"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                  <Pill className="w-3 h-3 text-rose-500" /> Prescription
+                </Label>
+                <Textarea
+                  placeholder="Medicines or next steps..."
+                  value={reportData.prescription}
+                  onChange={(e) =>
+                    setReportData({
+                      ...reportData,
+                      prescription: e.target.value,
+                    })
+                  }
+                  className="rounded-2xl border-slate-100 font-bold min-h-[100px] focus:ring-rose-100"
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="report" className="text-sm font-semibold text-slate-700">Checkup Report</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                <FileText className="w-3 h-3 text-blue-500" /> Additional Notes
+              </Label>
               <Textarea
-                id="report"
-                placeholder="Describe your findings, recommendations, and next steps..."
-                value={sessionReport}
-                onChange={(e) => setSessionReport(e.target.value)}
-                className="min-h-[200px] bg-slate-50 border-slate-200 focus:border-teal-500 focus:ring-teal-500 rounded-2xl"
+                placeholder="General advice, follow-up instructions..."
+                value={reportData.extraNotes}
+                onChange={(e) =>
+                  setReportData({ ...reportData, extraNotes: e.target.value })
+                }
+                className="rounded-2xl border-slate-100 font-bold min-h-[120px]"
               />
+            </div>
+
+            <div className="pt-4 border-t border-slate-50 space-y-3">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center justify-between">
+                <span>Medical Document (Optional)</span>
+                {reportData.reportUrl && (
+                  <span className="text-emerald-500 flex items-center gap-1 normal-case">
+                    <CheckCircle className="w-3 h-3" /> Uploaded
+                  </span>
+                )}
+              </Label>
+              
+              <div 
+                className={`relative group h-24 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-1 cursor-pointer overflow-hidden ${
+                  reportData.reportUrl 
+                    ? 'border-emerald-100 bg-emerald-50/30' 
+                    : 'border-slate-100 hover:border-teal-200 hover:bg-slate-50'
+                }`}
+                onClick={() => document.getElementById('report-file-upload').click()}
+              >
+                {uploading ? (
+                  <div className="flex flex-col items-center">
+                    <Loader2 className="w-6 h-6 text-teal-600 animate-spin mb-1" />
+                    <span className="text-[10px] font-bold text-slate-400">UPLOADING...</span>
+                  </div>
+                ) : reportData.reportUrl ? (
+                  <>
+                    <div className="flex items-center gap-2 text-emerald-600">
+                      <FileText className="w-5 h-5" />
+                      <span className="text-sm font-bold truncate max-w-[200px]">
+                        Document Attached
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-400">CLICK TO REPLACE</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-teal-100 group-hover:text-teal-600 text-slate-400 transition-colors">
+                      <FileUp className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-bold text-slate-500">Upload medical report or prescriptions</span>
+                    <span className="text-[10px] font-medium text-slate-400">PDF, PNG, JPG (MAX 10MB)</span>
+                  </>
+                )}
+                
+                <input
+                  id="report-file-upload"
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                  disabled={uploading}
+                />
+              </div>
+
+              {reportData.reportUrl && (
+                <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <div className="text-[10px] font-black uppercase text-slate-400 flex-1 truncate">
+                    {reportData.reportUrl}
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 px-2 text-rose-500 hover:text-rose-600 hover:bg-rose-50 font-bold text-xs"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setReportData(prev => ({ ...prev, reportUrl: "" }));
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <div className="p-8 pt-4 bg-slate-50/50 border-t border-slate-100 flex items-center gap-4">
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={() => setSelectedPatientForSession(null)}
-              className="rounded-xl border-slate-200"
+              className="flex-1 h-14 rounded-2xl text-slate-400 font-bold hover:text-rose-500 hover:bg-rose-50 transition-all border border-transparent hover:border-rose-100"
             >
               Cancel
             </Button>
             <Button
               onClick={handleEndSession}
-              disabled={endingSession || !sessionReport.trim()}
-              className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl flex items-center gap-2"
+              disabled={
+                endingSession ||
+                (!reportData.diagnosis &&
+                  !reportData.prescription &&
+                  !reportData.extraNotes &&
+                  !reportData.reportUrl)
+              }
+              className="flex-[2] bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-2xl h-14 font-black shadow-xl shadow-teal-200/50 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group"
             >
               {endingSession ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <CheckCircle className="w-4 h-4" />
+                <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
               )}
-              {endingSession ? "Saving..." : "End Session & Send Report"}
+              <span className="truncate">
+                {endingSession ? "Saving..." : "Complete & Send Report"}
+              </span>
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

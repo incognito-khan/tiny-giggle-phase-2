@@ -1,12 +1,12 @@
-import ChildrenPage from '@/components/parent-dashboard/children/page'
-import React from 'react'
+import ChildrenPage from "@/components/parent-dashboard/children/page";
+import React from "react";
 
 const page = () => {
   return (
-    <div>
-        <ChildrenPage />
+    <div className="w-full">
+      <ChildrenPage />
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default page;

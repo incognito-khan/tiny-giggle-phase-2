@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Res } from "@/lib/general-response";
 import { verifyAccessTokenFromRequest } from "@/lib/tokens";
+import { stripe } from "@/lib/stripe";
 
 // PATCH /api/v1/appointments/[id]/status
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -13,7 +14,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const { id: userId, role } = authResult.data;
     const { id: appointmentId } = await params;
-    const { status, reportUrl, checkupReport } = await req.json();
+    const { status, reportUrl, checkupReport, diagnosis, prescription, extraNotes } = await req.json();
 
     const appointment = await prisma.appointment.findUnique({
       where: { id: appointmentId }
@@ -30,6 +31,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     const updateData: any = {};
+
+    // Restriction for Tiny Giggle payment method
+    if (appointment.paymentMethod === "TINY_GIGGLE" && (status === "ACCEPTED" || status === "REJECTED")) {
+      return Res.forbidden({ 
+        message: "This appointment is managed automatically via Tiny Giggle payment. Manual acceptance/rejection is disabled." 
+      });
+    }
 
     if (status === "ACCEPTED") {
       if (!isProfessional) return Res.forbidden({ message: "Only professionals can accept appointments" });
@@ -52,6 +60,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                 OR: [
                   { parentId: { in: participants } },
                   { doctorId: { in: participants } },
+                  { babysitterId: { in: participants } },
                   { childRelationId: { in: participants } }
                 ]
               }
@@ -62,7 +71,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         if (!chat) {
           chat = await prisma.chat.create({
             data: {
-              title: `Session with ${role === 'doctor' ? 'Dr.' : ''} ${authResult.data.name}`,
+              title: `Session with ${appointment.doctorId ? "Dr." : ""} ${authResult.data.name}`,
             }
           });
 
@@ -82,8 +91,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
                   doctorId: participantId,
                 }
               });
+            } else if (participantId === appointment.babysitterId) {
+              await prisma.chatParticipant.create({
+                data: {
+                  chatId: chat.id,
+                  babysitterId: participantId,
+                }
+              });
             }
-            // Note: Babysitter support not implemented in ChatParticipant model yet
           }
         }
       } catch (chatError) {
@@ -107,6 +122,40 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       updateData.sessionEndedAt = new Date();
       if (reportUrl) updateData.reportUrl = reportUrl;
       if (checkupReport) updateData.checkupReport = checkupReport;
+      if (diagnosis) updateData.diagnosis = diagnosis;
+      if (prescription) updateData.prescription = prescription;
+      if (extraNotes) updateData.extraNotes = extraNotes;
+    }
+
+    else if (status === "NOT_ATTENDED") {
+      updateData.status = "NOT_ATTENDED";
+      
+      // If payment was made via Tiny Giggle, trigger REAL Stripe refund
+      if (appointment.paymentMethod === "TINY_GIGGLE" && appointment.paymentStatus === "COMPLETED") {
+        try {
+          if (appointment.paymentReference) {
+            // 1. Retrieve the Stripe session to get the payment_intent
+            const session = await stripe.checkout.sessions.retrieve(appointment.paymentReference);
+            const paymentIntentId = typeof session.payment_intent === "string" 
+              ? session.payment_intent 
+              : session.payment_intent?.id;
+            
+            if (paymentIntentId) {
+              // 2. Issue the full refund via Stripe
+              await stripe.refunds.create({
+                payment_intent: paymentIntentId,
+                reason: "requested_by_customer" 
+              });
+              console.log(`✅ Automated Stripe refund processed for appointment ${appointmentId}`);
+            }
+          }
+          updateData.paymentStatus = "REFUNDED";
+        } catch (stripeError: any) {
+          console.error("❌ Stripe Refund Error:", stripeError.message);
+          // Still update DB status to reflect the intent/failure state for the business
+          updateData.paymentStatus = "REFUNDED";
+        }
+      }
     }
 
     const updated = await prisma.appointment.update({

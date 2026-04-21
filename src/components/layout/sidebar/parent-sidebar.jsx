@@ -15,6 +15,7 @@ import {
   Bath,
   BookOpen,
   Music,
+  Bot,
   ChevronDown,
   ChevronUp,
   ShoppingCart,
@@ -62,40 +63,48 @@ const Sidebar = () => {
   const sections = [
     {
       key: "baby",
-      label: "Baby",
+      label: "My Baby",
       icon: Baby,
       roles: ["parent", "relative"],
       items: [
         {
-          name: "Children",
+          name: "Baby Profile",
           href: "/parent-dashboard/children",
           roles: ["parent", "relative"],
         },
         {
-          name: "Baby Growth",
+          name: "Growth Tracking",
           href: "/parent-dashboard/baby-growth",
           roles: ["parent", "relative"],
         },
         {
-          name: "Baby Activities",
+          name: "Activities",
           href: "/parent-dashboard/baby-activities",
           roles: ["parent", "relative"],
         },
         {
-          name: "Milestone",
+          name: "Milestones",
           href: "/parent-dashboard/milestones",
           roles: ["parent", "relative"],
         },
         {
-          name: "Family & Friends",
-          href: "/parent-dashboard/family-friends",
-          roles: ["parent"],
-        },
-        {
-          name: "Vaccination",
+          name: "Vaccination Records",
           href: "/parent-dashboard/vaccination",
           roles: ["parent", "relative"],
         },
+        {
+          name: "Appointments",
+          href: "/parent-dashboard/appointments",
+          roles: ["parent", "relative"],
+        },
+      ],
+    },
+    {
+      key: "careSupport",
+      label: "Care & Support",
+      icon: Heart,
+      roles: ["parent", "relative"],
+      items: [
         {
           name: "Doctors",
           href: "/parent-dashboard/doctors",
@@ -107,39 +116,72 @@ const Sidebar = () => {
           roles: ["parent", "relative"],
         },
         {
-          name: "Appointments",
-          href: "/parent-dashboard/appointments",
+          name: "Agent Chat",
+          href: "/parent-dashboard/agent",
+          roles: ["parent"],
+        },
+      ],
+    },
+    {
+      key: "familySocial",
+      label: "Family & Social",
+      icon: User,
+      roles: ["parent", "relative"],
+      items: [
+        {
+          name: "Family & Friends",
+          href: "/parent-dashboard/family-friends",
+          roles: ["parent"],
+        },
+        {
+          name: "Chats",
+          href: "/chat",
           roles: ["parent", "relative"],
         },
         {
-          name: "Cloud Albums",
-          href: "/parent-dashboard/cloud-albums",
+          name: "Q&A Hub",
+          href: "/parent-dashboard/community",
           roles: ["parent", "relative"],
         },
       ],
     },
     {
-      key: "reels",
-      label: "Reels",
-      icon: Video,
+      key: "memories",
+      label: "Memories",
+      icon: Camera,
+      roles: ["parent", "relative"],
       items: [
+        {
+          name: "Cloud Albums",
+          href: "/parent-dashboard/cloud-albums",
+          roles: ["parent", "relative"],
+        },
         {
           name: "Reels",
           href: "/parent-dashboard/reels",
           roles: ["parent", "relative"],
         },
       ],
-      roles: ["parent", "relative"],
     },
     {
-      key: "shopping",
-      label: "Shopping",
+      key: "shoppingMusic",
+      label: "Shopping & Music",
       icon: ShoppingCart,
       roles: ["parent", "relative"],
       items: [
         {
           name: "Store",
           href: "/parent-dashboard/store",
+          roles: ["parent", "relative"],
+        },
+        {
+          name: "Orders",
+          href: "/parent-dashboard/orders",
+          roles: ["parent", "relative"],
+        },
+        {
+          name: "Product Wishlist",
+          href: "/parent-dashboard/product-wishlist",
           roles: ["parent", "relative"],
         },
         {
@@ -153,31 +195,8 @@ const Sidebar = () => {
           roles: ["parent", "relative"],
         },
         {
-          name: "Product Wishlist",
-          href: "/parent-dashboard/product-wishlist",
-          roles: ["parent", "relative"],
-        },
-        {
           name: "Music Wishlist",
           href: "/parent-dashboard/music-wishlist",
-          roles: ["parent", "relative"],
-        },
-        {
-          name: "Orders",
-          href: "/parent-dashboard/orders",
-          roles: ["parent", "relative"],
-        },
-      ],
-    },
-    {
-      key: "messages",
-      label: "Messages",
-      icon: MessageCircle,
-      roles: ["parent"],
-      items: [
-        {
-          name: "Chats",
-          href: "/chat",
           roles: ["parent", "relative"],
         },
       ],
@@ -186,33 +205,11 @@ const Sidebar = () => {
       key: "mine",
       label: "Mine",
       icon: User,
-      roles: ["parent", "relative"],
+      roles: ["relative"],
       items: [
-        {
-          name: "Settings",
-          href: "/parent-dashboard/settings",
-          roles: ["parent", "relative"],
-        },
-        {
-          name: "Logout",
-          roles: ["parent", "relative"],
-        },
         {
           name: "Leave",
           roles: ["relative"],
-        },
-      ],
-    },
-    {
-      key: "communityCenter",
-      label: "Community",
-      icon: MessageCircle,
-      roles: ["parent", "relative"],
-      items: [
-        {
-          name: "Q&A Hub",
-          href: "/community",
-          roles: ["parent", "relative"],
         },
       ],
     },

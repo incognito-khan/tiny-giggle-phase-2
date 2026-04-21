@@ -157,7 +157,10 @@ export default function KidsActivities() {
             <div
               className="flex items-stretch gap-1  h-[230px] rounded-2xl"
               style={{
-                backgroundImage: `url(https://html.vecurosoft.com/toddly/demo/assets/img/rooms/room-video-bg.jpg)`,
+                // backgroundImage: `url(https://html.vecurosoft.com/toddly/demo/assets/img/rooms/room-video-bg.jpg)`,
+                backgroundImage: `url(/about/activities/right-image.png)`,
+                backgroundPosition: "center",
+                backgroundSize: "cover",
               }}
             >
               {/* Purple Experience Card */}
@@ -175,14 +178,14 @@ export default function KidsActivities() {
               <div className="flex-1 relative rounded-2xl overflow-hidden">
                 <div className="w-full h-[200px] bg-cover bg-center">
                   {/* Play Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  {/* <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform duration-300">
                       <Play
                         className="w-6 h-6 text-gray-700 ml-1"
                         fill="currentColor"
                       />
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

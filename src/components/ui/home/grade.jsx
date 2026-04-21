@@ -83,7 +83,9 @@ export default function GradePrograms() {
         {/* Children- moveable */}
         <div className="absolute right-0 -bottom-20 z-50">
           <motion.img
-            src="https://html.vecurosoft.com/toddly/demo/assets/img/pro/pro-ele-3.png"
+            src="/home/offer/baby.png"
+            className="w-96"
+            // src="https://html.vecurosoft.com/toddly/demo/assets/img/pro/pro-ele-3.png"
             alt=""
             style={{ x: xKids, y: yKids }}
           />

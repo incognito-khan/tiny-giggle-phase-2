@@ -16,7 +16,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@/store/slices/authSlice";
 import Link from "next/link";
 
-
 export default function Navbar() {
   const user = useSelector((state) => state.auth.user);
   const isUserLoggedIn = useSelector((state) => state.auth.isUserLoggedIn);
@@ -30,26 +29,18 @@ export default function Navbar() {
   const [activeItem, setActiveItem] = useState("HOME");
   const [hovered, setHovered] = useState("HOME");
 
-  const navItems = useMemo(() => isUserLoggedIn
-    ? [
-        "HOME",
-        "ABOUT",
-        "FOR PROFESSIONALS",
-        "DOWNLOAD",
-        "CONTACT",
-        "DASHBOARD",
-        "PRIVACY POLICY",
-      ]
-    : [
-        "HOME",
-        "ABOUT",
-        "FOR PROFESSIONALS",
-        "DOWNLOAD",
-        "CONTACT",
-        "PRIVACY POLICY",
-      ], [isUserLoggedIn]);
+  const navItems = useMemo(
+    () =>
+      isUserLoggedIn
+        ? ["HOME", "ABOUT", "DOWNLOAD", "CONTACT", "DASHBOARD"]
+        : ["HOME", "ABOUT", "DOWNLOAD", "CONTACT"],
+    [isUserLoggedIn],
+  );
 
-  const authItems = useMemo(() => isUserLoggedIn ? ["LOGOUT"] : ["LOGIN", "SIGNUP"], [isUserLoggedIn]);
+  const authItems = useMemo(
+    () => (isUserLoggedIn ? ["LOGOUT"] : ["SIGNIN/SIGNUP"]),
+    [isUserLoggedIn],
+  );
 
   useEffect(() => {
     // Map pathname to nav items
@@ -74,11 +65,11 @@ export default function Navbar() {
     if (item === "HOME") return "/";
     if (item === "ABOUT") return "/about";
     if (item === "DOWNLOAD") return "/download";
-    if (item === "FOR PROFESSIONALS") return "/for-professionals";
+    // if (item === "FOR PROFESSIONALS") return "/for-professionals";
     if (item === "CONTACT") return "/contact";
     if (item === "PRIVACY POLICY") return "/privacy-policy";
-    if (item === "LOGIN") return "/auth?tab=login";
-    if (item === "SIGNUP") return "/auth?tab=signup";
+    if (item === "SIGNIN/SIGNUP") return "/auth";
+    // if (item === "SIGNUP") return "/auth?tab=signup";
     if (item === "DASHBOARD") {
       if (user?.role === "doctor") return "/doctor-dashboard";
       if (user?.role === "babysitter") return "/babysitter-dashboard";
@@ -112,12 +103,22 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <span className="font-medium">Follow Us :</span>
             <div className="flex gap-2">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 cursor-pointer">
-                <Facebook className="w-4 h-4" />
-              </div>
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 cursor-pointer">
-                <Instagram className="w-4 h-4" />
-              </div>
+              <a
+                href="https://www.facebook.com/share/1DvrnHfAYc"
+                target="_blank"
+              >
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 cursor-pointer">
+                  <Facebook className="w-4 h-4" />
+                </div>
+              </a>
+              <a
+                href="https://www.instagram.com/tinyg_iggle?igsh=MXRyZzJidmQxNjVkMA=="
+                target="_blank"
+              >
+                <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 cursor-pointer">
+                  <Instagram className="w-4 h-4" />
+                </div>
+              </a>
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 cursor-pointer">
                 <Youtube className="w-4 h-4" />
               </div>
@@ -141,7 +142,7 @@ export default function Navbar() {
 
             {/* Navigation Menu */}
             <nav
-              className="hidden md:flex flex-1 flex-row items-center gap-0"
+              className="hidden md:flex flex-1 flex-row justify-center items-center gap-0"
               style={{ overflow: "visible", clipPath: "none" }}
             >
               {navItems.map((item) => {

@@ -44,35 +44,35 @@ export const educationData = [
   {
     id: 1,
     title: "Track Child Growth",
-    image: "https://html.vecurosoft.com/toddly/demo/assets/img/hero/banner-1-1.jpg",
+    image: "/home/features/1.jpeg",
     icon: Baby,
     description: "Height, weight aur daily growth record easily track karein aur graphs ke zariye progress dekhein."
   },
   {
     id: 2,
     title: "Milestones & Memories",
-    image: "https://html.vecurosoft.com/toddly/demo/assets/img/hero/banner-1-2.jpg",
+    image: "/home/features/3.png",
     icon: Heart,
     description: "First walk, first word aur special moments ko save karein pictures aur videos ke sath."
   },
   {
     id: 3,
     title: "Family & Relations",
-    image: "https://html.vecurosoft.com/toddly/demo/assets/img/hero/banner-1-1.jpg",
+    image: "/home/features/4.png",
     icon: Users,
     description: "Brother, sister, uncle, aunty aur grandparents ko connect karein jo child ki journey dekh saken."
   },
   {
     id: 4,
     title: "Shopping Center",
-    image: "https://html.vecurosoft.com/toddly/demo/assets/img/hero/banner-1-2.jpg",
+    image: "/home/features/5.png",
     icon: ShoppingBag,
     description: "Toys, clothes aur baby essentials parents aur family members directly buy kar saken."
   },
   {
     id: 5,
     title: "Kids Music",
-    image: "https://html.vecurosoft.com/toddly/demo/assets/img/hero/banner-1-1.jpg",
+    image: "/home/features/2.png",
     icon: Music,
     description: "Free aur premium lullabies, rhymes aur kids learning songs jo family child ke liye buy kar sakti hai."
   }

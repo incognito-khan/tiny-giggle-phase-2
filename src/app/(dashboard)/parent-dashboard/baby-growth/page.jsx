@@ -62,7 +62,7 @@ export default function GrowthPage() {
   const user = useSelector((state) => state.auth.user);
   const childId = useSelector((state) => state.child.childId);
   const activities = useSelector((state) => state.activity.activities);
-  console.log(activities, 'activities');
+  console.log(activities, "activities");
   const milestones = useSelector((state) => state.milestone.milestones);
   const vaccinations = useSelector((state) => state.vaccination.vaccinations);
   const growth = useSelector((state) => state.growth.growth);
@@ -73,36 +73,53 @@ export default function GrowthPage() {
   const [formData, setFormData] = useState({
     weight: "",
     height: "",
-    date: ""
-  })
+    date: "",
+  });
   const dispatch = useDispatch();
 
+  console.log(childId, "childId");
+
   const gettingLatestGrowths = () => {
+    if (!childId.length) return;
     dispatch(getLatestGrowth({ setLoading, parentId: user?.id, childId }));
   };
   const gettingAllGrowths = () => {
+    if (!childId.length) return;
     dispatch(getAllGrowths({ setLoading, parentId: user?.id, childId }));
   };
 
   const gettingAllMilestones = () => {
-    dispatch(getAllMilestonesWithSubForChild({ setLoading, parentId: user?.id, childId }))
-  }
+    if (!childId.length) return;
+    dispatch(
+      getAllMilestonesWithSubForChild({
+        setLoading,
+        parentId: user?.id,
+        childId,
+      }),
+    );
+  };
 
   const gettingAllVaccinations = () => {
-    dispatch(getAllChildVaccinations({ setLoading, parentId: user?.id, childId }))
-  }
+    if (!childId.length) return;
+    dispatch(
+      getAllChildVaccinations({ setLoading, parentId: user?.id, childId }),
+    );
+  };
 
   const gettingLatestActivities = () => {
+    if (!childId.length) return;
     dispatch(getLatestActivities({ setLoading, parentId: user?.id, childId }));
-  }
+  };
 
   useEffect(() => {
-    gettingLatestGrowths();
-    gettingAllGrowths();
-    gettingAllMilestones();
-    gettingAllVaccinations();
-    gettingLatestActivities();
-  }, []);
+    if (childId.length) {
+      gettingLatestGrowths();
+      gettingAllGrowths();
+      gettingAllMilestones();
+      gettingAllVaccinations();
+      gettingLatestActivities();
+    }
+  }, [childId]);
 
   // const getHeightPercentile = (h) => {
   //   if (h === 0) return 0;
@@ -127,12 +144,16 @@ export default function GrowthPage() {
 
     // Find closest age data
     const ref = avgHeights.reduce((prev, curr) =>
-      Math.abs(curr.age - ageMonths) < Math.abs(prev.age - ageMonths) ? curr : prev
+      Math.abs(curr.age - ageMonths) < Math.abs(prev.age - ageMonths)
+        ? curr
+        : prev,
     );
 
     if (height < ref.p3) return 3;
-    if (height < ref.p50) return 50 - Math.round(((ref.p50 - height) / (ref.p50 - ref.p3)) * 47);
-    if (height < ref.p97) return 50 + Math.round(((height - ref.p50) / (ref.p97 - ref.p50)) * 47);
+    if (height < ref.p50)
+      return 50 - Math.round(((ref.p50 - height) / (ref.p50 - ref.p3)) * 47);
+    if (height < ref.p97)
+      return 50 + Math.round(((height - ref.p50) / (ref.p97 - ref.p50)) * 47);
     return 97;
   };
 
@@ -169,12 +190,11 @@ export default function GrowthPage() {
     // Milestone Progress
     const totalSubMilestones = milestones.reduce(
       (acc, m) => acc + (m.subMilestones?.length || 0),
-      0
+      0,
     );
     const completedSubMilestones = milestones.reduce(
-      (acc, m) =>
-        acc + m.subMilestones.filter((s) => s.isCompleted).length,
-      0
+      (acc, m) => acc + m.subMilestones.filter((s) => s.isCompleted).length,
+      0,
     );
     const milestoneProgress =
       totalSubMilestones > 0
@@ -184,12 +204,10 @@ export default function GrowthPage() {
     // Vaccination Progress
     const totalVaccinations = vaccinations.length;
     const takenVaccinations = vaccinations.filter(
-      (v) => v.status === "TAKEN"
+      (v) => v.status === "TAKEN",
     ).length;
     const vaccinationProgress =
-      totalVaccinations > 0
-        ? (takenVaccinations / totalVaccinations) * 100
-        : 0;
+      totalVaccinations > 0 ? (takenVaccinations / totalVaccinations) * 100 : 0;
 
     // Growth Progress
     const ageMonths = getAgeInMonths(growths?.[0]?.age);
@@ -205,9 +223,7 @@ export default function GrowthPage() {
 
     // Final Weighted Health Score
     const overall =
-      milestoneProgress * 0.4 +
-      vaccinationProgress * 0.3 +
-      growthScore * 0.3;
+      milestoneProgress * 0.4 + vaccinationProgress * 0.3 + growthScore * 0.3;
 
     // Determine Health Status
     if (overall >= 85) return "Excellent";
@@ -233,17 +249,27 @@ export default function GrowthPage() {
     ];
 
     const ref = avgWeights.reduce((prev, curr) =>
-      Math.abs(curr.age - ageMonths) < Math.abs(prev.age - ageMonths) ? curr : prev
+      Math.abs(curr.age - ageMonths) < Math.abs(prev.age - ageMonths)
+        ? curr
+        : prev,
     );
 
     if (weight < ref.p3) return 3;
-    if (weight < ref.p50) return 50 - Math.round(((ref.p50 - weight) / (ref.p50 - ref.p3)) * 47);
-    if (weight < ref.p97) return 50 + Math.round(((weight - ref.p50) / (ref.p97 - ref.p50)) * 47);
+    if (weight < ref.p50)
+      return 50 - Math.round(((ref.p50 - weight) / (ref.p50 - ref.p3)) * 47);
+    if (weight < ref.p97)
+      return 50 + Math.round(((weight - ref.p50) / (ref.p97 - ref.p50)) * 47);
     return 97;
   };
 
-  const weightPercentile = getWeightPercentile(growth?.height || 0, ageMonths || 0);
-  const heightPercentile = getHeightPercentile(growth?.weight || 0, ageMonths || 0);
+  const weightPercentile = getWeightPercentile(
+    growth?.height || 0,
+    ageMonths || 0,
+  );
+  const heightPercentile = getHeightPercentile(
+    growth?.weight || 0,
+    ageMonths || 0,
+  );
 
   const formatAge = (age) => {
     const parts = [];
@@ -251,12 +277,10 @@ export default function GrowthPage() {
       parts.push(`${age?.years} year${age?.years > 1 ? "s" : ""}`);
     if (age?.months > 0)
       parts.push(`${age?.months} month${age?.months > 1 ? "s" : ""}`);
-    if (age?.days > 0) parts.push(`${age?.days} day${age?.days > 1 ? "s" : ""}`);
+    if (age?.days > 0)
+      parts.push(`${age?.days} day${age?.days > 1 ? "s" : ""}`);
     return parts.length > 0 ? parts.join(" ") : "0 days";
   };
-
-
-
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -291,24 +315,26 @@ export default function GrowthPage() {
     const body = {
       ...formData,
       weight: parseFloat(formData.weight),
-      height: parseFloat(formData.height)
-    }
-    console.log(body, 'body from handleAddRecord');
-    dispatch(createGrowth({ parentId: user?.id, setLoading, childId, formData: body }))
+      height: parseFloat(formData.height),
+    };
+    console.log(body, "body from handleAddRecord");
+    dispatch(
+      createGrowth({ parentId: user?.id, setLoading, childId, formData: body }),
+    );
     setIsAddGrowthOpen(false);
     setFormData({
       weight: "",
       height: "",
-      date: ""
+      date: "",
     });
-  }
+  };
 
   const calculateBMI = (weight, height) => {
     const heightM = height / 100;
-    const bmi = weight / (heightM * heightM)
+    const bmi = weight / (heightM * heightM);
 
     return bmi.toFixed(2);
-  }
+  };
 
   const getBMIStatus = (bmi) => {
     if (!bmi) return;
@@ -406,7 +432,6 @@ export default function GrowthPage() {
 
   const healthMetrics = getHealthMetrics(activities);
 
-
   return (
     <div className="min-h-screen w-screen bg-gradient-to-br from-pink-50 to-purple-100">
       {loading && <Loading />}
@@ -433,8 +458,11 @@ export default function GrowthPage() {
                   <p className="text-xl opacity-90">
                     Monitor your baby's development, health, and milestones
                   </p>
-                  {user?.role === 'parent' && (
-                    <Button className="mt-4 flex items-center mx-auto cursor-pointer bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 rounded-lg" onClick={() => setIsAddGrowthOpen(true)}>
+                  {user?.role === "parent" && (
+                    <Button
+                      className="mt-4 flex items-center mx-auto cursor-pointer bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 rounded-lg"
+                      onClick={() => setIsAddGrowthOpen(true)}
+                    >
                       <Plus className="w-4 h-4 mr-1" />
                       Add Growth
                     </Button>
@@ -466,7 +494,9 @@ export default function GrowthPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-green-100 text-sm">Weight</p>
-                    <p className="text-2xl font-bold">{growth?.weight || 0} kg</p>
+                    <p className="text-2xl font-bold">
+                      {growth?.weight || 0} kg
+                    </p>
                     {/* <p className="text-green-100 text-xs">
                       {weightPercentile}th percentile
                     </p> */}
@@ -481,7 +511,9 @@ export default function GrowthPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-purple-100 text-sm">Height</p>
-                    <p className="text-2xl font-bold">{growth?.height || 0} cm</p>
+                    <p className="text-2xl font-bold">
+                      {growth?.height || 0} cm
+                    </p>
                     {/* <p className="text-purple-100 text-xs">
                       {heightPercentile}th percentile
                     </p> */}
@@ -581,7 +613,11 @@ export default function GrowthPage() {
                         <div>
                           <p className="text-sm font-medium">Temperature</p>
                           <p className="text-xs text-gray-600">
-                            {activities?.temperature?.temperature?.[0]?.temperature} °C
+                            {
+                              activities?.temperature?.temperature?.[0]
+                                ?.temperature
+                            }{" "}
+                            °C
                           </p>
                         </div>
                       </div>
@@ -592,9 +628,12 @@ export default function GrowthPage() {
                           <Baby className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">Current Schedule</p>
+                          <p className="text-sm font-medium">
+                            Current Schedule
+                          </p>
                           <p className="text-xs text-gray-600">
-                            {activities?.schedule?.title || "No active schedule"}
+                            {activities?.schedule?.title ||
+                              "No active schedule"}
                           </p>
                         </div>
                       </div>
@@ -607,7 +646,11 @@ export default function GrowthPage() {
                         <div>
                           <p className="text-sm font-medium">Sleep Hours</p>
                           <p className="text-xs text-gray-600">
-                            {((activities?.sleep?.summary?.totalSleepMinutes || 0) / 60).toFixed(1)} hrs/day
+                            {(
+                              (activities?.sleep?.summary?.totalSleepMinutes ||
+                                0) / 60
+                            ).toFixed(1)}{" "}
+                            hrs/day
                           </p>
                         </div>
                       </div>
@@ -672,12 +715,14 @@ export default function GrowthPage() {
                       </div>
                     </div>
                     {growths?.slice(0, 4)?.map((growth, index) => {
-                      const bmi = growth?.weight && growth?.height
-                        ? calculateBMI(growth.weight, growth.height)
-                        : null;
-                      const pi = growth?.weight && growth?.height
-                        ? calculatePI(growth.weight, growth.height)
-                        : null;
+                      const bmi =
+                        growth?.weight && growth?.height
+                          ? calculateBMI(growth.weight, growth.height)
+                          : null;
+                      const pi =
+                        growth?.weight && growth?.height
+                          ? calculatePI(growth.weight, growth.height)
+                          : null;
                       return (
                         <div
                           key={index}
@@ -704,7 +749,7 @@ export default function GrowthPage() {
                             </div>
                           </div>
                         </div>
-                      )
+                      );
                     })}
                   </div>
                 </CardContent>
@@ -904,7 +949,10 @@ export default function GrowthPage() {
                     </div>
                     <h3 className="font-semibold text-lg">Sleep Hours</h3>
                     <p className="text-2xl font-bold">
-                      {((activities?.sleep?.summary?.totalSleepMinutes || 0) / 60).toFixed(1)}{" "}
+                      {(
+                        (activities?.sleep?.summary?.totalSleepMinutes || 0) /
+                        60
+                      ).toFixed(1)}{" "}
                       <span className="text-sm font-normal text-gray-600">
                         hrs/day
                       </span>
@@ -967,17 +1015,24 @@ export default function GrowthPage() {
                   <CardContent>
                     <div className="space-y-4">
                       {healthMetrics?.map((metric, index) => (
-                        <div key={index} className="flex justify-between items-center">
+                        <div
+                          key={index}
+                          className="flex justify-between items-center"
+                        >
                           <span className="text-sm font-medium">
                             {metric?.name}
                           </span>
                           <div className="flex items-center gap-2">
-                            <Progress value={metric?.value?.toFixed()} className="w-20 h-2" />
-                            <span className="text-sm">{metric?.value?.toFixed()}%</span>
+                            <Progress
+                              value={metric?.value?.toFixed()}
+                              className="w-20 h-2"
+                            />
+                            <span className="text-sm">
+                              {metric?.value?.toFixed()}%
+                            </span>
                           </div>
                         </div>
                       ))}
-
                     </div>
                   </CardContent>
                 </Card>
@@ -1028,12 +1083,14 @@ export default function GrowthPage() {
                       </div>
                     </div>
                     {growths?.slice(0, 4)?.map((growth, index) => {
-                      const bmi = growth?.weight && growth?.height
-                        ? calculateBMI(growth.weight, growth.height)
-                        : null;
-                      const pi = growth?.weight && growth?.height
-                        ? calculatePI(growth.weight, growth.height)
-                        : null;
+                      const bmi =
+                        growth?.weight && growth?.height
+                          ? calculateBMI(growth.weight, growth.height)
+                          : null;
+                      const pi =
+                        growth?.weight && growth?.height
+                          ? calculatePI(growth.weight, growth.height)
+                          : null;
                       return (
                         <div
                           key={index}
@@ -1060,7 +1117,7 @@ export default function GrowthPage() {
                             </div>
                           </div>
                         </div>
-                      )
+                      );
                     })}
                   </div>
                 </CardContent>
@@ -1167,7 +1224,7 @@ export default function GrowthPage() {
           </Tabs>
         </div>
       </div>
-      {user?.role === 'parent' && (
+      {user?.role === "parent" && (
         <Dialog open={isAddGrowthOpen} onOpenChange={setIsAddGrowthOpen}>
           <DialogContent className="sm:max-w-md rounded-2xl">
             <DialogHeader>

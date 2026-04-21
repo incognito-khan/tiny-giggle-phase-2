@@ -63,3 +63,21 @@ export async function getPresignedUrl(key: string) {
     { expiresIn: 3600 },
   );
 }
+
+/**
+ * Detects if a URL is an S3 URL and returns a pre-signed URL if so.
+ */
+export async function signS3Url(url: string | null | undefined) {
+  if (!url || typeof url !== "string" || !url.includes(".amazonaws.com/")) return url;
+  try {
+    const urlObj = new URL(url);
+    const key = urlObj.pathname.startsWith("/")
+      ? urlObj.pathname.slice(1)
+      : urlObj.pathname;
+    return await getPresignedUrl(key);
+  } catch (err) {
+    console.error("Error signing S3 URL:", err);
+    return url;
+  }
+}
+

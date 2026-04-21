@@ -153,9 +153,9 @@ export default function PreschoolHero() {
         {/* Call to Action Section */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           {/* Admission Button */}
-          <button className=" bg-brand text-white font-bold py-4 px-8 rounded-full border-2 border-dashed border-orange-300 hover:scale-105 transition-transform duration-300 shadow-lg uppercase tracking-wider">
+          {/* <button className=" bg-brand text-white font-bold py-4 px-8 rounded-full border-2 border-dashed border-orange-300 hover:scale-105 transition-transform duration-300 shadow-lg uppercase tracking-wider">
             Watch Now
-          </button>
+          </button> */}
 
           {/* Call Support */}
           <div className="flex items-center gap-4">

@@ -12,7 +12,8 @@ import {
   ShoppingBag,
   Music,
   Share2,
-  Flag
+  Flag,
+  Trash2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
@@ -27,7 +28,7 @@ const ROLE_ICONS = {
   ARTIST: { icon: Music, color: "text-indigo-500", bg: "bg-indigo-50" },
 };
 
-export default function AnswerItem({ answer, onLike }) {
+export default function AnswerItem({ answer, onLike, onDelete, currentUserId }) {
   const roleInfo = ROLE_ICONS[answer.authorType] || ROLE_ICONS.PARENT;
   const IconComponent = roleInfo.icon;
 
@@ -104,13 +105,25 @@ export default function AnswerItem({ answer, onLike }) {
               </Button>
             </div>
 
-            <Button 
-              variant="ghost" 
-              size="sm"
-              className="rounded-xl hover:bg-rose-50 text-slate-300 hover:text-rose-400 h-9 w-9 p-0 transition-all opacity-0 group-hover:opacity-100"
-            >
-              <Flag className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              {onDelete && answer.authorId === currentUserId && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => onDelete(answer.id)}
+                  className="rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-500 h-9 w-9 p-0 transition-all opacity-0 group-hover:opacity-100"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="rounded-xl hover:bg-rose-50 text-slate-300 hover:text-rose-400 h-9 w-9 p-0 transition-all opacity-0 group-hover:opacity-100"
+              >
+                <Flag className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>

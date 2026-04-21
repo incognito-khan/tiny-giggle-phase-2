@@ -64,7 +64,10 @@ export default function GuideSection() {
   }, [inView, mainControls, subControls]);
 
   return (
-    <div ref={ref} className="min-h-screen bg-[#faf8f5] py-16 px-8">
+    <div
+      ref={ref}
+      className="min-h-screen bg-[#faf8f5] py-16 px-8 flex flex-col justify-center"
+    >
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
@@ -98,9 +101,15 @@ export default function GuideSection() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="relative grid grid-cols-3 gap-8">
+        <div className="w-full">
+          <img
+            src="/professionals/guide-image-transparent.png"
+            alt=""
+            className="w-full"
+          />
+        </div>
+        {/* <div className="relative grid grid-cols-3 gap-8">
           <div className="flex flex-col gap-10">
-            {/* Top Left Service */}
             <div className="col-span-1 flex items-center justify-end gap-5 text-center">
               <div className="flex flex-col gap-1 w-[65%]">
                 <h2 className="text-2xl font-bold text-gray-800">
@@ -116,7 +125,6 @@ export default function GuideSection() {
               </div>
             </div>
 
-            {/* Top Right Service */}
             <div className="col-span-1 flex items-center justify-end gap-5 text-center">
               <div className="flex flex-col gap-1 w-[65%]">
                 <h2 className="text-2xl font-bold text-gray-800">
@@ -133,7 +141,6 @@ export default function GuideSection() {
             </div>
           </div>
 
-          {/* Central Image with Badge */}
           <div className="col-span-1 flex items-center justify-center relative">
             <img
               src="https://html.vecurosoft.com/toddly/demo/assets/img/feature/feature-image-3-1.png"
@@ -142,7 +149,6 @@ export default function GuideSection() {
           </div>
 
           <div className="flex flex-col gap-10">
-            {/* Bottom Left Service */}
             <div className="col-span-1 flex items-center justify-start gap-5 text-center">
               <div className="flex flex-col gap-1 w-[65%]">
                 <h2 className="text-2xl font-bold text-gray-800">
@@ -158,7 +164,6 @@ export default function GuideSection() {
               </div>
             </div>
 
-            {/* Bottom Right Service */}
             <div className="col-span-1 flex items-center justify-start gap-5 text-center">
               <div className="flex flex-col gap-1 w-[65%]">
                 <h2 className="text-2xl font-bold text-gray-800">
@@ -174,7 +179,7 @@ export default function GuideSection() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
