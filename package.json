@@ -55,7 +55,7 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.544.0",
     "nanoid": "^5.1.6",
-    "next": "15.5.3",
+    "next": "16.2.4",
     "nodemailer": "^7.0.6",
     "pusher": "^5.2.0",
     "pusher-js": "^8.4.0",
